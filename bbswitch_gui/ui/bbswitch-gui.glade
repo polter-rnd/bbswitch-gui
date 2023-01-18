@@ -273,7 +273,7 @@
                           <object class="GtkImage">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="icon-name">ram-symbolic</property>
+                            <property name="icon-name">bbswitch-ram-symbolic</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
