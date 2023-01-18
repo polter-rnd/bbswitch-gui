@@ -1,0 +1,24 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+
+# Python setuptools
+build/
+dist/
+*.egg-info/
+
+# Python environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+
+# Autosave files
+*~
+
+# IDE project files
+.vscode/
+.idea/
+*.sublime-workspace
+*.code-workspace
