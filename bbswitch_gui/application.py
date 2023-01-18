@@ -78,9 +78,11 @@ class Application(Gtk.Application):
             self.window.update_header(bus_id, enabled, vendor, device)
 
         if enabled:
+            logger.debug(f'Adapter {bus_id} is ON')
             self.bbswitch_enabled_ts = time.monotonic()
             self.nvidia.monitor_start(self.update_nvidia, bus_id)
         else:
+            logger.debug(f'Adapter {bus_id} is OFF')
             self.nvidia.monitor_stop()
 
     def update_nvidia(self, bus_id) -> None:
