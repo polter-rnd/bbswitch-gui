@@ -111,7 +111,8 @@ class NvidiaMonitor():
                 # Get everything available from NVML, gather memory usage
                 for proc in pynvml.nvmlDeviceGetComputeRunningProcesses(handle) \
                         + pynvml.nvmlDeviceGetGraphicsRunningProcesses(handle):
-                    fuser_pids.remove(proc.pid)  # If pid found, remove it from fuser
+                    if proc.pid in fuser_pids:
+                        fuser_pids.remove(proc.pid)
                     res['processes'].append({
                         'pid': proc.pid,
                         'mem_used': round(proc.usedGpuMemory / 1024 / 1024),
