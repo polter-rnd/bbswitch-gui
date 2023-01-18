@@ -1,0 +1,5 @@
+button.flat:not(:hover):not(:checked) {
+    box-shadow: none;
+    background: transparent;
+    border-color: transparent;
+}
