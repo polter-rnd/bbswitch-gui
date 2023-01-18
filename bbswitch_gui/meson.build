@@ -14,7 +14,7 @@ endif
 
 # Check GTK+ version
 gtk3_check = run_command(python,
-    ['-c', 'import gi;gi.require_version("Gtk", "3.0")'],
+    ['-c', 'import gi; gi.require_version("Gtk", "3.0")'],
     check : false
 )
 assert(gtk3_check.returncode() == 0,

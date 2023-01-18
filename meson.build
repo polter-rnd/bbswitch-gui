@@ -1,5 +1,8 @@
 project('bbswitch-gui',
-    version : '0.1.0'
+    version : run_command(find_program('python3'),
+        ['-c', 'from bbswitch_gui import __version__; print(__version__)'],
+        check : true
+    ).stdout().strip()
 )
 
 # Required parts
