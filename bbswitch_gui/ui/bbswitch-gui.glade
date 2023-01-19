@@ -529,6 +529,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="model">processes_store</property>
+            <property name="activate-on-single-click">True</property>
             <child internal-child="selection">
               <object class="GtkTreeSelection">
                 <property name="mode">none</property>

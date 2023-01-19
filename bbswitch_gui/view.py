@@ -40,6 +40,7 @@ class MainWindow(Gtk.ApplicationWindow):
     header_bar = Gtk.Template.Child()
 
     processes_store = Gtk.Template.Child()
+    processes_view = Gtk.Template.Child()
     pid_column = Gtk.Template.Child()
     memory_column = Gtk.Template.Child()
     name_column = Gtk.Template.Child()
@@ -66,6 +67,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self._switch_activated_conn = self.state_switch.connect(
             'notify::active', self._on_switch_activated)
 
+        self.processes_view.connect('row-activated', self._on_process_activated)
         self.processes_store.connect('row-inserted', self._on_process_added_or_removed)
         self.processes_store.connect('row-deleted', self._on_process_added_or_removed)
 
@@ -82,7 +84,6 @@ class MainWindow(Gtk.ApplicationWindow):
         self.name_column.add_attribute(text_renderer, 'text', 2)
 
         check_renderer = Gtk.CellRendererToggle()
-        check_renderer.connect('toggled', self._on_process_toggled)
         self.check_column.pack_start(check_renderer, False)
         self.check_column.add_attribute(check_renderer, 'active', 3)
 
@@ -230,10 +231,10 @@ class MainWindow(Gtk.ApplicationWindow):
         if page:
             self.bar_stack.set_visible_child(page)
 
-    def _on_process_toggled(self, cellrenderertoggle, treepath):
-        del cellrenderertoggle  # unused argument
+    def _on_process_activated(self, treeview, path, column):
+        del treeview, column  # unused argument
         # pylint: disable=unsubscriptable-object
-        self.processes_store[treepath][3] = not self.processes_store[treepath][3]
+        self.processes_store[path][3] = not self.processes_store[path][3]
 
     def _on_process_added_or_removed(self, store, path=None, iterator=None):
         del path, iterator  # unused argument
