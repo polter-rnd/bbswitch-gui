@@ -47,7 +47,9 @@ class Application(Gtk.Application):
         self.bbswitch = BBswitchMonitor()
         self.client = BBswitchClient()
         self.nvidia = NvidiaMonitor(timeout=REFRESH_TIMEOUT)
-        self.bbswitch_enabled_ts = 0
+
+        # Timestamp of last state switching
+        self._state_switched_ts = 0
 
         # Ping server so it will load bbswitch module
         try:
@@ -79,7 +81,6 @@ class Application(Gtk.Application):
 
         if enabled:
             logger.debug(f'Adapter {bus_id} is ON')
-            self.bbswitch_enabled_ts = time.monotonic()
             self.nvidia.monitor_start(self.update_nvidia, bus_id)
         else:
             logger.debug(f'Adapter {bus_id} is OFF')
@@ -97,7 +98,7 @@ class Application(Gtk.Application):
             if self.window:
                 if info is None:
                     # None return value means no kernel modules available
-                    if time.monotonic() - self.bbswitch_enabled_ts > MODULE_LOAD_TIMEOUT:
+                    if time.monotonic() - self._state_switched_ts > MODULE_LOAD_TIMEOUT:
                         # If it took really long time, display warning
                         self.window.show_warning(
                             'NVIDIA kernel modules not loaded. Retrying...')
@@ -157,6 +158,8 @@ class Application(Gtk.Application):
         if self.client.in_progress():
             self.client.cancel()
             return
+
+        self._state_switched_ts = time.monotonic()
 
         # Switch to opposite state
         self.client.set_gpu_state(state, self._on_state_switch_finish)
