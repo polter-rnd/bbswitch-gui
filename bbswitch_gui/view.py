@@ -25,7 +25,7 @@ class MainWindow(Gtk.ApplicationWindow):
     }
 
     state_switch = Gtk.Template.Child()
-    modules_popover = Gtk.Template.Child()
+    modules_label = Gtk.Template.Child()
 
     monitor_bar = Gtk.Template.Child()
     temperature_label = Gtk.Template.Child()
@@ -168,6 +168,10 @@ class MainWindow(Gtk.ApplicationWindow):
                 process['cmdline'],
                 False
             ])
+
+        # Update modules
+        self.modules_label.set_text(
+            '\n'.join(['• ' + m for m in gpu_info['modules']]))
 
     def show_info(self, message) -> None:
         """Show information bar with informational message.

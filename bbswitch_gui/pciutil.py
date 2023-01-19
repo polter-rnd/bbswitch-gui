@@ -20,7 +20,7 @@ class PCIUtil:
         try:
             with open(f'/sys/bus/pci/devices/{bus_id}/vendor', encoding='utf-8') as file:
                 vendor = file.read().removeprefix('0x').rstrip()
-        except FileNotFoundError as err:
+        except OSError as err:
             raise PCIUtilException(err) from err
 
         return vendor
@@ -37,7 +37,7 @@ class PCIUtil:
         try:
             with open(f'/sys/bus/pci/devices/{bus_id}/device', encoding='utf-8') as file:
                 device = file.read().removeprefix('0x').rstrip()
-        except FileNotFoundError as err:
+        except OSError as err:
             raise PCIUtilException(err) from err
 
         return device
@@ -69,7 +69,7 @@ class PCIUtil:
                         continue
                     if line.startswith('\t'):
                         ids_lib[temp_vendor][line.split()[0]] = {'name': ' '.join(line.split()[1:])}
-        except FileNotFoundError as err:
+        except OSError as err:
             raise PCIUtilException(err) from err
 
         if vendor not in ids_lib or device not in ids_lib[vendor]:

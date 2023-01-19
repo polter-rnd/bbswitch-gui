@@ -47,6 +47,9 @@ class NVidiaGpuInfo(TypedDict):
     processes: List[NVidiaGpuProcessInfo]
     """List of processes running on GPU (see :class:`NVidiaGpuProcessInfo`)"""
 
+    modules: List[str]
+    """List of NVIDIA kernel modules loaded"""
+
 
 class NvidiaMonitorException(Exception):
     """Exception thrown by :class:`NvidiaMonitor` class methods."""
@@ -79,12 +82,15 @@ class NvidiaMonitor():
             'mem_used': 0,
             'mem_total': 0,
             'gpu_util': 0,
-            'processes': []
+            'processes': [],
+            'modules': []
         }
 
         try:
             pynvml.nvmlInit()
             device_count = pynvml.nvmlDeviceGetCount()
+
+            res['modules'] = self._get_modules()
 
             for i in range(0, device_count):
                 handle = pynvml.nvmlDeviceGetHandleByIndex(i)
@@ -159,6 +165,18 @@ class NvidiaMonitor():
         if self.timer is not None:
             GObject.source_remove(self.timer)
             self.timer = None
+
+    def _get_modules(self) -> list[str]:
+        modules = []
+        try:
+            with open('/proc/modules', encoding='utf-8') as file:
+                for line in file:
+                    parts = line.split(' ')
+                    if len(parts) > 0 and line.startswith('nvidia'):
+                        modules.append(parts[0])
+        except OSError as err:
+            raise NvidiaMonitorException(err) from err
+        return modules
 
     def _timer_callback(self):
         # Do not call a callback if timer has been stopped
