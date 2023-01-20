@@ -372,7 +372,7 @@
                       <object class="GtkImage">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="icon-name">info-symbolic</property>
+                        <property name="icon-name">dialog-information-symbolic</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
