@@ -145,7 +145,8 @@ class NvidiaMonitor():
             raise NvidiaMonitorException(f'NVMLError: {err}') from err
         finally:
             # Don't forget to release resources
-            pynvml.nvmlShutdown()
+            if pynvml.nvmlLib is not None:
+                pynvml.nvmlShutdown()
 
         raise NvidiaMonitorException(f'GPU {bus_id} not found in nvidia-smi')
 
