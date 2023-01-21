@@ -269,5 +269,8 @@ class MainWindow(Gtk.ApplicationWindow):
     @Gtk.Template.Callback()
     def _on_switch_pressed(self, switch, gdata):
         del gdata  # unused argument
-        self.emit('power-state-switch-requested', not switch.get_active())
-        return True
+        if self.processes_store.iter_n_children() > 0:
+            self.error_dialog('NVIDIA GPU is in use', 'Please stop processes using it first')
+        else:
+            self.emit('power-state-switch-requested', not switch.get_active())
+        return True  # state of the switch is managed programmatically
