@@ -5,7 +5,7 @@ import logging
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import GLib, GObject, Gio, Gtk
+from gi.repository import GLib, Gio, Gtk
 
 from .pciutil import PCIUtil, PCIUtilException
 from .bbswitch import BBswitchClient, BBswitchClientException
@@ -55,7 +55,7 @@ class Application(Gtk.Application):
         try:
             self.client.send_command('status')
         except BBswitchClientException as err:
-            logging.warn(err)
+            logging.warning(err)
 
     def update_bbswitch(self) -> None:
         """Update GPU state from `bbswitch` module."""
@@ -80,10 +80,10 @@ class Application(Gtk.Application):
             self.window.update_header(bus_id, enabled, vendor, device)
 
         if enabled:
-            logger.debug(f'Adapter {bus_id} is ON')
+            logger.debug('Adapter %s is ON', bus_id)
             self.nvidia.monitor_start(self.update_nvidia, bus_id)
         else:
-            logger.debug(f'Adapter {bus_id} is OFF')
+            logger.debug('Adapter %s is OFF', bus_id)
             self.nvidia.monitor_stop()
 
     def update_nvidia(self, bus_id) -> None:
@@ -140,7 +140,7 @@ class Application(Gtk.Application):
         # convert GVariantDict -> GVariant -> dict
         options = options.end().unpack()
 
-        if 'debug' in options:
+        if 'verbose' in options:
             logging.getLogger().setLevel(logging.DEBUG)
             logger.debug('Verbose output enabled')
 
