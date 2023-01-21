@@ -45,7 +45,9 @@ class MainWindow(Gtk.ApplicationWindow):
     memory_column = Gtk.Template.Child()
     name_column = Gtk.Template.Child()
     check_column = Gtk.Template.Child()
+
     kill_button = Gtk.Template.Child()
+    toggle_button = Gtk.Template.Child()
 
     # Disable following warnings on dynamic GObject types
     # pylint: disable=no-member
@@ -86,6 +88,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.state_switch.set_state(False)
         self.state_switch.set_sensitive(False)
         self.kill_button.set_sensitive(False)
+        self.toggle_button.set_sensitive(False)
         self.processes_store.clear()
 
     def update_header(self, bus_id: str, enabled: bool, vendor: str, device: str) -> None:
@@ -219,12 +222,10 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def _get_selected_pids(self):
         pids = []
-        i = self.processes_store.get_iter_first()
-        while i is not None:
-            i_next = self.processes_store.iter_next(i)
-            if self.processes_store.get_value(i, 3) is True:
-                pids.append(self.processes_store.get_value(i, 0))
-            i = i_next
+        self.processes_store.foreach(
+            lambda store, path, iter, data:
+                data.append(store[path][0]) if store[path][3] else None,
+            pids)
         return pids
 
     @Gtk.Template.Callback()
@@ -238,6 +239,7 @@ class MainWindow(Gtk.ApplicationWindow):
     def _on_process_added_or_removed(self, store, path=None, iterator=None):
         del store, path, iterator  # unused argument
         self.kill_button.set_sensitive(len(self._get_selected_pids()) > 0)
+        self.toggle_button.set_sensitive(self.processes_store.iter_n_children() > 0)
 
     @Gtk.Template.Callback()
     def _on_kill_button_clicked(self, button):
@@ -245,6 +247,24 @@ class MainWindow(Gtk.ApplicationWindow):
         for pid in self._get_selected_pids():
             print(pid)
             os.kill(pid, signal.SIGKILL)
+
+    @Gtk.Template.Callback()
+    def _on_toggle_button_clicked(self, button):
+        del button  # unused argument
+        row_count = self.processes_store.iter_n_children()
+        if row_count == 0:
+            # Nothing to select/deselect
+            return
+        elif row_count != len(self._get_selected_pids()):
+            # Select all
+            self.processes_store.foreach(
+                lambda store, path, iter: store.set_value(iter, 3, True))
+            self.kill_button.set_sensitive(True)
+        else:
+            # Deselect all
+            self.processes_store.foreach(
+                lambda store, path, iter: store.set_value(iter, 3, False))
+            self.kill_button.set_sensitive(False)
 
     @Gtk.Template.Callback()
     def _on_switch_pressed(self, switch, gdata):
