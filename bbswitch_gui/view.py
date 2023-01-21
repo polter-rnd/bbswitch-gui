@@ -63,14 +63,6 @@ class MainWindow(Gtk.ApplicationWindow):
                 Gdk.Screen.get_default(), provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)  # pylint: disable=no-member
 
-        # Used later to block handler on programmatic state changes
-        self._switch_activated_conn = self.state_switch.connect(
-            'notify::active', self._on_switch_activated)
-
-        self.processes_view.connect('row-activated', self._on_process_activated)
-        self.processes_store.connect('row-inserted', self._on_process_added_or_removed)
-        self.processes_store.connect('row-deleted', self._on_process_added_or_removed)
-
         number_renderer = Gtk.CellRendererText()
         number_renderer.set_property('xalign', 1.0)
         self.pid_column.pack_start(number_renderer, True)
@@ -87,16 +79,12 @@ class MainWindow(Gtk.ApplicationWindow):
         self.check_column.pack_start(check_renderer, False)
         self.check_column.add_attribute(check_renderer, 'active', 3)
 
-        self.kill_button.connect('clicked', self._on_kill_button_clicked)
-
     def reset(self) -> None:
         """Reset window to default state."""
         self.header_bar.set_title('bbswitch-gui')
         self.header_bar.set_subtitle('')
-        self.state_switch.handler_block(self._switch_activated_conn)
         self.state_switch.set_state(False)
         self.state_switch.set_sensitive(False)
-        self.state_switch.handler_unblock(self._switch_activated_conn)
         self.kill_button.set_sensitive(False)
         self.processes_store.clear()
 
@@ -113,10 +101,8 @@ class MainWindow(Gtk.ApplicationWindow):
         else:
             self.show_info('Discrete graphics card is turned off')
 
-        self.state_switch.handler_block(self._switch_activated_conn)
         self.state_switch.set_state(enabled)
         self.state_switch.set_sensitive(True)
-        self.state_switch.handler_unblock(self._switch_activated_conn)
 
         if device is None:
             self.header_bar.set_title(f'NVIDIA GPU on {bus_id}')
@@ -231,32 +217,37 @@ class MainWindow(Gtk.ApplicationWindow):
         if page:
             self.bar_stack.set_visible_child(page)
 
-    def _on_process_activated(self, treeview, path, column):
-        del treeview, column  # unused argument
-        # pylint: disable=unsubscriptable-object
-        self.processes_store[path][3] = not self.processes_store[path][3]
-
-    def _on_process_added_or_removed(self, store, path=None, iterator=None):
-        del path, iterator  # unused argument
-        row_count = 0
-        i = store.get_iter_first()
-        while i is not None:
-            row_count += 1
-            i = store.iter_next(i)
-        if row_count == 0:
-            self.kill_button.set_sensitive(False)
-        else:
-            self.kill_button.set_sensitive(True)
-
-    def _on_kill_button_clicked(self, button):
-        del button  # unused argument
+    def _get_selected_pids(self):
+        pids = []
         i = self.processes_store.get_iter_first()
         while i is not None:
             i_next = self.processes_store.iter_next(i)
             if self.processes_store.get_value(i, 3) is True:
-                os.kill(self.processes_store.get_value(i, 0), signal.SIGKILL)
+                pids.append(self.processes_store.get_value(i, 0))
             i = i_next
+        return pids
 
-    def _on_switch_activated(self, switch, gparam):
-        del gparam  # usused argument
-        self.emit('power-state-switch-requested', switch.get_active())
+    @Gtk.Template.Callback()
+    def _on_process_activated(self, treeview, path, column):
+        del treeview, column  # unused argument
+        # pylint: disable=unsubscriptable-object
+        self.processes_store[path][3] = not self.processes_store[path][3]
+        self.kill_button.set_sensitive(len(self._get_selected_pids()) > 0)
+
+    @Gtk.Template.Callback()
+    def _on_process_added_or_removed(self, store, path=None, iterator=None):
+        del store, path, iterator  # unused argument
+        self.kill_button.set_sensitive(len(self._get_selected_pids()) > 0)
+
+    @Gtk.Template.Callback()
+    def _on_kill_button_clicked(self, button):
+        del button  # unused argument
+        for pid in self._get_selected_pids():
+            print(pid)
+            os.kill(pid, signal.SIGKILL)
+
+    @Gtk.Template.Callback()
+    def _on_switch_pressed(self, switch, gdata):
+        del gdata  # unused argument
+        self.emit('power-state-switch-requested', not switch.get_active())
+        return True

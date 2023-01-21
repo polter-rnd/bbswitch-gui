@@ -65,6 +65,8 @@
       <!-- column-name checked -->
       <column type="gboolean"/>
     </columns>
+    <signal name="row-deleted" handler="_on_process_added_or_removed" swapped="no"/>
+    <signal name="row-inserted" handler="_on_process_added_or_removed" swapped="no"/>
   </object>
   <template class="MainWindow" parent="GtkApplicationWindow">
     <property name="width-request">480</property>
@@ -530,6 +532,7 @@
             <property name="can-focus">True</property>
             <property name="model">processes_store</property>
             <property name="activate-on-single-click">True</property>
+            <signal name="row-activated" handler="_on_process_activated" swapped="no"/>
             <child internal-child="selection">
               <object class="GtkTreeSelection">
                 <property name="mode">none</property>
@@ -582,6 +585,7 @@
                 <property name="receives-default">True</property>
                 <property name="image">delete_image</property>
                 <property name="always-show-image">True</property>
+                <signal name="clicked" handler="_on_kill_button_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -611,6 +615,7 @@
           <object class="GtkSwitch" id="state_switch">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <signal name="button-press-event" handler="_on_switch_pressed" swapped="no"/>
           </object>
         </child>
       </object>
