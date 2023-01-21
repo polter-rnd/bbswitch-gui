@@ -17,15 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# pylint: disable=invalid-name,import-outside-toplevel
+
 import importlib.util
 import sys
-import logging
 
-# Setup logger
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(name)s \033[1m%(levelname)s\033[0m %(message)s')
 
 def load_module():
+    """Check if bbswitch_gui module installed and load it."""
     if not importlib.util.find_spec("bbswitch_gui"):
         print("""Cannot find the bbswitch_gui module.
 Perhaps it is installed in a folder which is not in Python's module search
