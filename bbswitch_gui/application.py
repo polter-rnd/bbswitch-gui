@@ -11,7 +11,7 @@ from .pciutil import PCIUtil, PCIUtilException
 from .bbswitch import BBswitchClient, BBswitchClientException
 from .bbswitch import BBswitchMonitor, BBswitchMonitorException
 from .nvidia import NvidiaMonitor, NvidiaMonitorException
-from .view import MainWindow
+from .window import MainWindow
 
 # Setup logger
 logging.basicConfig(level=logging.INFO,
@@ -154,13 +154,14 @@ class Application(Gtk.Application):
             self.window.error_dialog('Failed to switch power state', str(error))
         self.window.set_cursor_arrow()
 
-    def _on_state_switch(self, view, state):
+    def _on_state_switch(self, window, state):
         if self.client.in_progress():
             self.client.cancel()
             return
 
+        # Save timestamp when power state change was requested
         self._state_switched_ts = time.monotonic()
 
         # Switch to opposite state
         self.client.set_gpu_state(state, self._on_state_switch_finish)
-        view.set_cursor_busy()
+        window.set_cursor_busy()

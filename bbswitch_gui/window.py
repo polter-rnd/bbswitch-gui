@@ -61,7 +61,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         Gtk.StyleContext.add_provider_for_screen(
                 Gdk.Screen.get_default(), provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)  # pylint: disable=no-member
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         number_renderer = Gtk.CellRendererText()
         number_renderer.set_property('xalign', 1.0)
