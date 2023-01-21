@@ -1,25 +1,24 @@
-%global commit 70d6098cbe742b49cb4efc6aa016bee7e54b4eae
-%global shortcommit %(c=%{commit}; echo ${c:0:7})
-
 Name:           bbswitch-gui
 Version:        0.1.0
-Release:        1.git%{shortcommit}%{?dist}
+Release:        1%{?dist}
 Summary:        GUI tool for managing NVIDIA GPU power states and utilization on Optimus laptops
 
 License:        GPLv3+
 URL:            https://github.com/polter-rnd/bbswitch-gui
-Source0:        https://github.com/polter-rnd/bbswitch-gui/archive/%{commit}/bbswitch-gui-%{shortcommit}.tar.gz
+Source0:        https://github.com/polter-rnd/bbswitch-gui/archive/%{version}/bbswitch-gui-%{version}.tar.gz
 
 BuildArch:      noarch
 
 BuildRequires:  meson
-BuildRequires:  python-rpm-macros
+BuildRequires:  python3-devel
+BuildRequires:  python3-gobject
+BuildRequires:  python3-py3nvml
 
 Requires:       gtk3
-Requires:       python3-gobject
-Requires:       python3-py3nvml
 Requires:       psmisc
 Requires:       bbswitchd
+Requires:       python3-gobject
+Requires:       python3-py3nvml
 
 %?python_enable_dependency_generator
 
@@ -31,7 +30,7 @@ Uses bbswitchd daemon to switch video adapter power state and NVML to monitor GP
 
 
 %prep
-%autosetup -p1 -n bbswitch-gui-%{commit}
+%autosetup -p1 -n bbswitch-gui-%{version}
 
 
 %build

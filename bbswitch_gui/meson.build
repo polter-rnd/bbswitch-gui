@@ -12,14 +12,6 @@ if not python.found()
     )
 endif
 
-# Check GTK+ version
-gtk3_check = run_command(python,
-    ['-c', 'import gi; gi.require_version("Gtk", "3.0")'],
-    check : false
-)
-assert(gtk3_check.returncode() == 0,
-       'Check if GTK+3 is installed')
-
 py_sources = [
     '__init__.py',
     'application.py',
