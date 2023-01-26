@@ -1,7 +1,9 @@
 # bbswitch-gui
 
-GUI tool for managing NVIDIA GPU power states and utilization on Optimus laptops.
-Provides a user-friendly interface for managing and monitoring dedicated graphics adapter.
+GUI for monitoring and toggling NVIDIA GPU power on Optimus laptops.
+
+Provides a user-friendly interface for managing power state
+and monitoring utilization of dedicated graphics adapter.
 
 ![ Preview ](data/screenshots/preview.png)
 
