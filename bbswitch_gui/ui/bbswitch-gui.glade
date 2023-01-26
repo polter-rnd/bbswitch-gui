@@ -637,7 +637,7 @@
           <object class="GtkSwitch" id="state_switch">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <signal name="button-press-event" handler="_on_switch_pressed" swapped="no"/>
+            <signal name="button-release-event" handler="_on_switch_released" swapped="no"/>
           </object>
         </child>
       </object>

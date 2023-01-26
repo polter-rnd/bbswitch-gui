@@ -267,7 +267,7 @@ class MainWindow(Gtk.ApplicationWindow):
             self.kill_button.set_sensitive(False)
 
     @Gtk.Template.Callback()
-    def _on_switch_pressed(self, switch, gdata):
+    def _on_switch_released(self, switch, gdata):
         del gdata  # unused argument
         if self.processes_store.iter_n_children() > 0:
             self.error_dialog('NVIDIA GPU is in use', 'Please stop processes using it first')
