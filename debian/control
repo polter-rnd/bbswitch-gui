@@ -18,6 +18,7 @@ Depends: bbswitchd,
          python3-gi,
          python3-pynvml,
          psmisc,
+         hwdata,
          ${misc:Depends}
 Description: GUI for monitoring and toggling NVIDIA GPU power on Optimus laptops
  Provides a user-friendly interface for managing power state

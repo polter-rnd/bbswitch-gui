@@ -14,11 +14,12 @@ BuildRequires:  python3-devel
 BuildRequires:  python3-gobject
 BuildRequires:  python3-py3nvml
 
-Requires:       gtk3
-Requires:       psmisc
 Requires:       bbswitchd
+Requires:       gtk3
 Requires:       python3-gobject
 Requires:       python3-py3nvml
+Requires:       psmisc
+Requires:       hwdata
 
 %?python_enable_dependency_generator
 
