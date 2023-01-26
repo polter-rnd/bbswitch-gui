@@ -1,7 +1,7 @@
 Name:           bbswitch-gui
 Version:        0.1.0
 Release:        1%{?dist}
-Summary:        GUI tool for managing NVIDIA GPU power states and utilization on Optimus laptops
+Summary:        GUI for monitoring and toggling NVIDIA GPU power on Optimus laptops
 
 License:        GPLv3+
 URL:            https://github.com/polter-rnd/bbswitch-gui
@@ -24,9 +24,12 @@ Requires:       python3-py3nvml
 
 
 %description
-GUI tool for managing NVIDIA GPU power states and utilization on Optimus laptops.
-Provides a user-friendly interface for managing and monitoring dedicated graphics adapter.
-Uses bbswitchd daemon to switch video adapter power state and NVML to monitor GPU parameters.
+Provides a user-friendly interface for managing power state
+and monitoring utilization of dedicated graphics adapter.
+
+Useful for pre-Turing GPU generations without dynamic power management features,
+allows to fully benefit from NVIDIA PRIME Render Offload technology
+without need to keep graphics adapter turned on all the time.
 
 
 %prep
