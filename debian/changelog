@@ -1,3 +1,9 @@
+bbswitch-gui (0.1.1-2) UNRELEASED; urgency=medium
+
+  * Added required build dependency python3-distutils
+
+ -- Pavel Artsishevsky <polter.rnd@gmail.com>  Thu, 26 Jan 2023 17:14:08 +0300
+
 bbswitch-gui (0.1.1-1) UNRELEASED; urgency=medium
 
   * Increase default window size
