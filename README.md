@@ -22,6 +22,33 @@ to switch video adapter power state (`ON` or `OFF`) and NVML to monitor GPU para
 
 ## Installation
 
+### Using prebuilt packages
+
+The most straightforward way to install is to use prebuilt packages from
+[copr for Fedora](https://copr.fedorainfracloud.org/coprs/polter/bumblebee)
+or [PPA for Ubuntu](https://launchpad.net/~polter-rnd/+archive/ubuntu/bbswitch-gui).
+
+For Fedora:
+
+```bash
+$ sudo dnf copr enable polter/bumblebee
+$ sudo dnf install bbswitch-gui
+```
+
+For Ubuntu:
+```bash
+$ sudo add-apt-repository ppa:polter-rnd/bbswitch-gui
+$ sudo apt update
+$ sudo apt install bbswitch-gui
+```
+
+After package installation please check that your user have been added to `bbswitchd`
+group using `groups` command, and then re-login or reboot the machine to apply it.
+
+That simple.
+
+### Building from source
+
 #### Requirements
 
 Check if you have `PyGObject` module installed (usually available in you Linux ditribution),
@@ -142,4 +169,5 @@ Please make sure to update tests as appropriate.
 ## License
 
 This software is distributed under [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html).
-See `LICENSE` file for more information.
+See [LICENSE](https://raw.githubusercontent.com/polter-rnd/bbswitchd/master/LICENSE)
+file for more information.
