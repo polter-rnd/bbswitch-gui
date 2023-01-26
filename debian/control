@@ -1,0 +1,27 @@
+Source: bbswitch-gui
+Section: utils
+Priority: optional
+Maintainer: Pavel Artsishevsky <polter.rnd@gmail.com>
+Build-Depends: debhelper-compat (= 12),
+               meson (>= 0.53.0),
+               python3-gi,
+               python3-pynvml
+Standards-Version: 4.5.1
+Homepage: https://github.com/polter-rnd/bbswitch-gui
+Rules-Requires-Root: no
+
+Package: bbswitch-gui
+Architecture: all
+Depends: bbswitchd,
+         libgtk-3-0,
+         python3-gi,
+         python3-pynvml,
+         psmisc,
+         ${misc:Depends}
+Description: GUI for monitoring and toggling NVIDIA GPU power on Optimus laptops
+ Provides a user-friendly interface for managing power state
+ and monitoring utilization of dedicated graphics adapter.
+ .
+ Useful for pre-Turing GPU generations without dynamic power management features,
+ allows to fully benefit from NVIDIA PRIME Render Offload technology
+ without need to keep graphics adapter turned on all the time.
