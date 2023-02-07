@@ -245,7 +245,6 @@ class MainWindow(Gtk.ApplicationWindow):
     def _on_kill_button_clicked(self, button):
         del button  # unused argument
         for pid in self._get_selected_pids():
-            print(pid)
             os.kill(pid, signal.SIGKILL)
 
     @Gtk.Template.Callback()
