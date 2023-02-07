@@ -96,10 +96,9 @@ class NvidiaMonitor():
                 handle = pynvml.nvmlDeviceGetHandleByIndex(i)
                 pci_info = pynvml.nvmlDeviceGetPciInfo(handle)
 
-                if hasattr(pci_info, 'busIdLegacy'):
-                    if pci_info.busIdLegacy.decode() != bus_id:
-                        continue
-                elif pci_info.busId.decode() != bus_id:
+                if hasattr(pci_info, 'busIdLegacy') and pci_info.busIdLegacy.decode() != bus_id:
+                    continue
+                if pci_info.busId.decode() != bus_id:
                     continue
 
                 mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)

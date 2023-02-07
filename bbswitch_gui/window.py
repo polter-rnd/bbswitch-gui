@@ -254,7 +254,7 @@ class MainWindow(Gtk.ApplicationWindow):
         if row_count == 0:
             # Nothing to select/deselect
             return
-        elif row_count != len(self._get_selected_pids()):
+        if row_count != len(self._get_selected_pids()):
             # Select all
             self.processes_store.foreach(
                 lambda store, path, iter: store.set_value(iter, 3, True))
