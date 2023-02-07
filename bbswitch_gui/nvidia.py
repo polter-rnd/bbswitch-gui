@@ -179,8 +179,14 @@ class NvidiaMonitor():
             with open('/proc/modules', encoding='utf-8') as file:
                 for line in file:
                     parts = line.split(' ')
-                    if len(parts) > 0 and line.startswith('nvidia'):
-                        modules.append(parts[0])
+                    if len(parts) > 0:
+                        if line.startswith('nvidia'):
+                            modules.append(parts[0])
+                        elif line.startswith('nouveau'):
+                            raise NvidiaMonitorException(
+                                'Nouveau is not supported. '
+                                'Please install NVIDIA proprietary driver!'
+                            )
         except OSError as err:
             raise NvidiaMonitorException(err) from err
         return modules
