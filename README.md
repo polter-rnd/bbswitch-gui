@@ -58,17 +58,18 @@ and `GTK+` library for GUI (development package is not needed).
 For Fedora:
 
 ```bash
-$ sudo dnf install gtk3 python3-gobject python3-py3nvml psmisc
+$ sudo dnf install gtk3 python3-gobject python3-py3nvml hwdata psmisc
 ```
 
 For Ubuntu:
 
 ```bash
-$ sudo apt-get install libgtk-3-0 python3-gi python3-pynvml psmisc
+$ sudo apt-get install libgtk-3-0 python3-gi python3-pynvml hwdata psmisc
 ```
 
 To be able to manage dedicated GPU power state, you also need to install `bbswitchd` daemon.
-Refer to *Installation* section [here](https://github.com/polter-rnd/bbswitchd).
+Refer to [Installation](https://github.com/polter-rnd/bbswitchd#installation) paragraph
+of [bbswitchd](https://github.com/polter-rnd/bbswitchd) manual.
 
 #### Installing using pip
 
@@ -83,7 +84,7 @@ $ python3 -m pip install --user .
 And system-wide:
 
 ```bash
-$ python3 -m pip install .
+$ sudo python3 -m pip install .
 ```
 
 After that `bbswitch-gui` command will appear in your `PATH`.
@@ -103,7 +104,7 @@ $ sudo dnf install meson
 For Ubuntu:
 
 ```bash
-$ sudo apt-get install meson
+$ sudo apt-get install python3-distutils meson
 ```
 
 Then build and install the project (specify `--prefix` argument
