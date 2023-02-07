@@ -101,7 +101,8 @@ class Application(Gtk.Application):
                     if time.monotonic() - self._state_switched_ts > MODULE_LOAD_TIMEOUT:
                         # If it took really long time, display warning
                         self.window.show_warning(
-                            'NVIDIA kernel modules not loaded. Retrying...')
+                            'NVIDIA kernel modules are not loaded. '
+                            'Is the driver installed?')
                     else:
                         # Otherwise it's normal, loading modules can take some time
                         self.window.show_info('Loading NVIDIA kernel modules...')

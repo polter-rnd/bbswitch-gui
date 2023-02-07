@@ -86,11 +86,12 @@ class NvidiaMonitor():
             'modules': []
         }
 
+        # Currently loaded NVIDIA kernel modules
+        res['modules'] = self._get_modules()
+
         try:
             pynvml.nvmlInit()
             device_count = pynvml.nvmlDeviceGetCount()
-
-            res['modules'] = self._get_modules()
 
             for i in range(0, device_count):
                 handle = pynvml.nvmlDeviceGetHandleByIndex(i)
