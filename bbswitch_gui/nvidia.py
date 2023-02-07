@@ -153,7 +153,7 @@ class NvidiaMonitor():
 
         raise NvidiaMonitorException(f'GPU {bus_id} not found in nvidia-smi')
 
-    def monitor_start(self, on_change: Callable, *on_change_args: Any):
+    def monitor_start(self, on_change: Callable, *on_change_args: Any) -> None:
         """Start monitoring changes of nvidia-smi info.
 
         Calls the callback with optional arguments every several seconds.
@@ -168,13 +168,13 @@ class NvidiaMonitor():
             self.callback(*self.callback_args)
             self.timer = GObject.timeout_add_seconds(self.timeout, self._timer_callback)
 
-    def monitor_stop(self):
+    def monitor_stop(self) -> None:
         """Stop monitoring changes of GPU states."""
         if self.timer is not None:
             GObject.source_remove(self.timer)
             self.timer = None
 
-    def _get_modules(self) -> list[str]:
+    def _get_modules(self):
         modules = []
         try:
             with open('/proc/modules', encoding='utf-8') as file:

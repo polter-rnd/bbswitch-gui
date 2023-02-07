@@ -1,5 +1,7 @@
 """Module containing utilities for PCI subsystem."""
 
+from typing import Tuple
+
 
 class PCIUtilException(Exception):
     """Exception thrown by :class:`PCIUtil` class methods."""
@@ -43,7 +45,7 @@ class PCIUtil:
         return device
 
     @staticmethod
-    def get_device_info(vendor, device) -> (str, str):
+    def get_device_info(vendor, device) -> Tuple[str, str]:
         """Retrieve vendor and device names by PCI vendor and device IDs.
 
         :param vendor: Vendor ID (e.g. `10de`)

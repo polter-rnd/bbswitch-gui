@@ -1,6 +1,6 @@
 """Module containing utilities for monitoring bbswitch states."""
 
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Tuple
 from gi.repository import Gio, GLib
 
 BBSWITCH_PATH = '/proc/acpi/bbswitch'       # Path to bbswitch control file
@@ -126,7 +126,7 @@ class BBswitchMonitor:
         self.callback = None
         self.callback_args = None
 
-    def get_gpu_state(self) -> (str, bool):
+    def get_gpu_state(self) -> Tuple[str, bool]:
         """Return a tuple with PCI bus ID and it's enabled state (`True` or `False`).
 
         :raises: :class:`BBswitchMonitorException` on failure
