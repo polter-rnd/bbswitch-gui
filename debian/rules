@@ -5,3 +5,12 @@ export PYTHONPATH := /usr/lib/python3/dist-packages
 
 %:
 	dh $@ --buildsystem meson
+
+# Workaround for meson < 0.60: move package to PYTHONPATH
+override_dh_auto_install:
+	dh_auto_install
+	find "$(CURDIR)"/debian/bbswitch-gui/usr/lib/python3.*/site-packages \
+		-name bbswitch_gui -type d \
+		-exec mkdir -p "$(CURDIR)"/debian/bbswitch-gui$(PYTHONPATH) \; \
+		-exec mv -t "$(CURDIR)"/debian/bbswitch-gui$(PYTHONPATH) {} + || :
+	find "$(CURDIR)"/debian/bbswitch-gui -empty -type d -delete || :
