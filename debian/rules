@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+# Don't depent on exact Python3 version
+export PYTHONPATH := /usr/lib/python3/dist-packages
+
 %:
 	dh $@ --buildsystem meson
-
