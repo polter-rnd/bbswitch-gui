@@ -1,6 +1,6 @@
 Name:           bbswitch-gui
 Version:        0.1.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        GUI for monitoring and toggling NVIDIA GPU power on Optimus laptops
 
 License:        GPLv3+
@@ -20,8 +20,6 @@ Requires:       python3-gobject
 Requires:       python3-py3nvml
 Requires:       psmisc
 Requires:       hwdata
-
-%?python_enable_dependency_generator
 
 
 %description
@@ -56,6 +54,9 @@ without need to keep graphics adapter turned on all the time.
 
 
 %changelog
+* Sun Mar 12 2023 Pavel Artsishevsky <polter.rnd@gmail.com> - 0.1.2-2
+- Remove unused %python_enable_dependency_generator macro
+
 * Sat Mar 11 2023 Pavel Artsishevsky <polter.rnd@gmail.com> - 0.1.2-1
 - Add warning about incompatibility with nouveau driver
 - Fix false positive "Loading kernel modules" message
