@@ -157,9 +157,6 @@ class Application(Gtk.Application):
             self.update_bbswitch()
             if self.window:
                 self.window.error_dialog('Failed to switch power state', str(error))
-        else:
-            # Save timestamp when power state has switched
-            self._state_switched_ts = time.monotonic()
         if self.window:
             self.window.set_cursor_arrow()
 
@@ -167,6 +164,9 @@ class Application(Gtk.Application):
         if self.client.in_progress():
             self.client.cancel()
             return
+
+        # Save timestamp when power state change was requested
+        self._state_switched_ts = time.monotonic()
 
         # Switch to opposite state
         self.client.set_gpu_state(state, self._on_state_switch_finish)
