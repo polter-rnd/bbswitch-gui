@@ -3,12 +3,14 @@
 import os
 import signal
 import logging
+
+from typing import cast
 from pkg_resources import resource_filename
 
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
-from gi.repository import GObject, Gtk, Gdk, Pango
+from gi.repository import GObject, Gtk, Gdk, Pango  # pyright: ignore
 
 from .nvidia import NVidiaGpuInfo
 
@@ -21,49 +23,48 @@ class MainWindow(Gtk.ApplicationWindow):
 
     __gtype_name__ = "MainWindow"
     __gsignals__ = {
-        'power-state-switch-requested': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (bool,))
+        'power-state-switch-requested': (GObject.SIGNAL_RUN_LAST,
+                                         GObject.TYPE_NONE, (bool,))
     }
 
-    state_switch = Gtk.Template.Child()
-    modules_label = Gtk.Template.Child()
+    state_switch = cast(Gtk.Switch, Gtk.Template.Child())
+    modules_label = cast(Gtk.Label, Gtk.Template.Child())
 
-    monitor_bar = Gtk.Template.Child()
-    temperature_label = Gtk.Template.Child()
-    power_label = Gtk.Template.Child()
-    memory_label = Gtk.Template.Child()
-    utilization_label = Gtk.Template.Child()
+    monitor_bar = cast(Gtk.InfoBar, Gtk.Template.Child())
+    temperature_label = cast(Gtk.Label, Gtk.Template.Child())
+    power_label = cast(Gtk.Label, Gtk.Template.Child())
+    memory_label = cast(Gtk.Label, Gtk.Template.Child())
+    utilization_label = cast(Gtk.Label, Gtk.Template.Child())
 
-    bar_stack = Gtk.Template.Child()
-    info_label = Gtk.Template.Child()
-    error_label = Gtk.Template.Child()
-    warning_label = Gtk.Template.Child()
-    header_bar = Gtk.Template.Child()
+    bar_stack = cast(Gtk.Stack, Gtk.Template.Child())
+    info_label = cast(Gtk.Label, Gtk.Template.Child())
+    error_label = cast(Gtk.Label, Gtk.Template.Child())
+    warning_label = cast(Gtk.Label, Gtk.Template.Child())
+    header_bar = cast(Gtk.HeaderBar, Gtk.Template.Child())
 
-    processes_store = Gtk.Template.Child()
-    processes_view = Gtk.Template.Child()
-    pid_column = Gtk.Template.Child()
-    memory_column = Gtk.Template.Child()
-    name_column = Gtk.Template.Child()
-    check_column = Gtk.Template.Child()
+    processes_store = cast(Gtk.ListStore, Gtk.Template.Child())
+    processes_view = cast(Gtk.TreeView, Gtk.Template.Child())
+    pid_column = cast(Gtk.TreeViewColumn, Gtk.Template.Child())
+    memory_column = cast(Gtk.TreeViewColumn, Gtk.Template.Child())
+    name_column = cast(Gtk.TreeViewColumn, Gtk.Template.Child())
+    check_column = cast(Gtk.TreeViewColumn, Gtk.Template.Child())
 
-    kill_button = Gtk.Template.Child()
-    toggle_button = Gtk.Template.Child()
+    kill_button = cast(Gtk.Button, Gtk.Template.Child())
+    toggle_button = cast(Gtk.Button, Gtk.Template.Child())
 
-    # Disable following warnings on dynamic GObject types
-    # pylint: disable=no-member
-
-    def __init__(self, app, **kwargs):
+    def __init__(self, app, **kwargs) -> None:
         """Initialize GUI widgets."""
         super().__init__(**kwargs)
         self.set_application(app)
 
         provider = Gtk.CssProvider()
         provider.load_from_path(resource_filename(
-            __name__, 'ui/style.css'))
+            __name__, 'ui/style.css'))  # type: ignore
 
-        Gtk.StyleContext.add_provider_for_screen(
-                Gdk.Screen.get_default(), provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        screen = Gdk.Screen.get_default()
+        if screen:
+            Gtk.StyleContext.add_provider_for_screen(
+                screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         number_renderer = Gtk.CellRendererText()
         number_renderer.set_property('xalign', 1.0)
@@ -83,7 +84,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def reset(self) -> None:
         """Reset window to default state."""
-        self.header_bar.set_title('bbswitch-gui')
+        self.header_bar.set_title('bbswitch-gui')  # type: ignore
         self.header_bar.set_subtitle('')
         self.state_switch.set_state(False)
         self.state_switch.set_sensitive(False)
@@ -110,7 +111,8 @@ class MainWindow(Gtk.ApplicationWindow):
         if device is None:
             self.header_bar.set_title(f'NVIDIA GPU on {bus_id}')
         else:
-            self.header_bar.set_title(device[device.find('[') + 1:device.find(']')])
+            self.header_bar.set_title(
+                device[device.find('[') + 1:device.find(']')])  # type: ignore
 
         if vendor is None:
             self.header_bar.set_subtitle('Additional PCI info is not available')
@@ -131,8 +133,8 @@ class MainWindow(Gtk.ApplicationWindow):
         # Update GPU parameters
         self.temperature_label.set_text(str(gpu_info['gpu_temp']) + ' °C')
         self.power_label.set_text(f"{gpu_info['power_draw']:.2f} W")
-        self.memory_label.set_text(str(gpu_info['mem_used']) + ' / ' +
-                                   format_mem(gpu_info['mem_total']))
+        self.memory_label.set_text(str(gpu_info['mem_used']) + ' / '
+                                   + format_mem(gpu_info['mem_total']))
         self.utilization_label.set_text(str(gpu_info['gpu_util']) + ' %')
 
         # Update existing PIDs
@@ -194,7 +196,6 @@ class MainWindow(Gtk.ApplicationWindow):
         """
         dialog = Gtk.MessageDialog(
             transient_for=self,
-            flags=0,
             message_type=Gtk.MessageType.ERROR,
             buttons=Gtk.ButtonsType.CLOSE,
             text=title,
@@ -205,15 +206,17 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def set_cursor_busy(self) -> None:
         """Set the mouse to be a hourglass."""
-        watch = Gdk.Cursor(Gdk.CursorType.WATCH)
         gdk_window = self.get_window()
-        gdk_window.set_cursor(watch)
+        if gdk_window:
+            watch = Gdk.Cursor(Gdk.CursorType.WATCH)
+            gdk_window.set_cursor(watch)
 
     def set_cursor_arrow(self):
         """Set the mouse to be a normal arrow."""
-        arrow = Gdk.Cursor(Gdk.CursorType.ARROW)
         gdk_window = self.get_window()
-        gdk_window.set_cursor(arrow)
+        if gdk_window:
+            arrow = Gdk.Cursor(Gdk.CursorType.ARROW)
+            gdk_window.set_cursor(arrow)
 
     def _set_bar_stack_page(self, name: str):
         page = self.bar_stack.get_child_by_name(name)
@@ -239,7 +242,7 @@ class MainWindow(Gtk.ApplicationWindow):
     def _on_process_added_or_removed(self, store, path=None, iterator=None):
         del store, path, iterator  # unused argument
         self.kill_button.set_sensitive(len(self._get_selected_pids()) > 0)
-        self.toggle_button.set_sensitive(self.processes_store.iter_n_children() > 0)
+        self.toggle_button.set_sensitive(self.processes_store.iter_n_children(None) > 0)
 
     @Gtk.Template.Callback()
     def _on_kill_button_clicked(self, button):
@@ -250,7 +253,7 @@ class MainWindow(Gtk.ApplicationWindow):
     @Gtk.Template.Callback()
     def _on_toggle_button_clicked(self, button):
         del button  # unused argument
-        row_count = self.processes_store.iter_n_children()
+        row_count = self.processes_store.iter_n_children(None)
         if row_count == 0:
             # Nothing to select/deselect
             return
@@ -266,9 +269,9 @@ class MainWindow(Gtk.ApplicationWindow):
             self.kill_button.set_sensitive(False)
 
     @Gtk.Template.Callback()
-    def _on_switch_released(self, switch, gdata):
+    def _on_switch_released(self, switch: Gtk.Switch, gdata):
         del gdata  # unused argument
-        if self.processes_store.iter_n_children() > 0:
+        if self.processes_store.iter_n_children(None) > 0:
             self.error_dialog('NVIDIA GPU is in use', 'Please stop processes using it first')
         else:
             self.emit('power-state-switch-requested', not switch.get_active())

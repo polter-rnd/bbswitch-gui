@@ -1,12 +1,12 @@
 """Module containing utilities for monitoring NVIDIA GPUs."""
 
-from typing import Any, Callable, List, TypedDict
-from gi.repository import GObject
+from typing import Any, Callable, List, TypedDict, Optional, Tuple
+from gi.repository import GObject  # pyright: ignore
 
 try:
-    import pynvml
+    import pynvml  # pyright: ignore
 except ImportError:
-    from py3nvml import py3nvml as pynvml
+    from py3nvml import py3nvml as pynvml  # pyright: ignore
 
 from .psutil import PSUtil, PSUtilException
 
@@ -58,17 +58,17 @@ class NvidiaMonitorException(Exception):
 class NvidiaMonitor():
     """Wrapper for executing nvidia-smi and parsing output."""
 
-    def __init__(self, timeout: int = 1):
+    def __init__(self, timeout: int = 1) -> None:
         """Initialize monitoring for `nvidia-smi` output.
 
         :param timeout: How often to check for GPU information, in seconds
         """
-        self.timeout = timeout
-        self.timer = None
-        self.callback = None
-        self.callback_args = None
+        self.timeout: int = timeout
+        self.timer: Optional[int] = None
+        self.callback: Optional[Callable] = None
+        self.callback_args: Tuple[Any, ...] = ()
 
-    def gpu_info(self, bus_id: str) -> NVidiaGpuInfo:
+    def gpu_info(self, bus_id: str) -> Optional[NVidiaGpuInfo]:
         """Return NVIDIA GPU information.
 
         Uses `NVML` library internally.
@@ -89,25 +89,29 @@ class NvidiaMonitor():
         # Currently loaded NVIDIA kernel modules
         res['modules'] = self._get_modules()
 
+        nvml_initialized = False
         try:
             pynvml.nvmlInit()
+            nvml_initialized = True
+
             device_count = pynvml.nvmlDeviceGetCount()
 
             for i in range(0, device_count):
                 handle = pynvml.nvmlDeviceGetHandleByIndex(i)
                 pci_info = pynvml.nvmlDeviceGetPciInfo(handle)
 
-                if hasattr(pci_info, 'busIdLegacy') and pci_info.busIdLegacy.decode() != bus_id:
-                    continue
-                if pci_info.busId.decode() != bus_id:
+                if hasattr(pci_info, 'busIdLegacy'):
+                    if pci_info.busIdLegacy != bus_id:
+                        continue
+                elif pci_info.busId != bus_id.encode():
                     continue
 
                 mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-                res['mem_total'] = round(mem_info.total / 1024 / 1024)
-                res['mem_used'] = round(mem_info.used / 1024 / 1024)
+                res['mem_total'] = round(int(mem_info.total) / 1024 / 1024)
+                res['mem_used'] = round(int(mem_info.used) / 1024 / 1024)
 
                 util_rates = pynvml.nvmlDeviceGetUtilizationRates(handle)
-                res['gpu_util'] = util_rates.gpu
+                res['gpu_util'] = int(util_rates.gpu)
 
                 gpu_temp = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
                 res['gpu_temp'] = gpu_temp
@@ -135,25 +139,25 @@ class NvidiaMonitor():
                 for pid in fuser_pids:
                     res['processes'].append({
                         'pid': pid,
-                        'mem_used': None,
+                        'mem_used': 0,
                         'cmdline': PSUtil.get_cmdline(pid)
                     })
 
                 return res
         except (pynvml.NVMLError, PSUtilException) as err:
-            if hasattr(err, 'value') and err.value == pynvml.NVML_ERROR_DRIVER_NOT_LOADED:
+            if err.value == pynvml.NVML_ERROR_DRIVER_NOT_LOADED:  # type: ignore
                 # If driver is not loaded, just ignore this and return None
                 return None
 
             raise NvidiaMonitorException(f'NVMLError: {err}') from err
         finally:
             # Don't forget to release resources
-            if pynvml.nvmlLib is not None:
+            if nvml_initialized:
                 pynvml.nvmlShutdown()
 
         raise NvidiaMonitorException(f'GPU {bus_id} not found in nvidia-smi')
 
-    def monitor_start(self, on_change: Callable, *on_change_args: Any) -> None:
+    def monitor_start(self, on_change: Callable, *on_change_args) -> None:
         """Start monitoring changes of nvidia-smi info.
 
         Calls the callback with optional arguments every several seconds.
@@ -164,9 +168,9 @@ class NvidiaMonitor():
         """
         self.callback = on_change
         self.callback_args = on_change_args
-        if self.timer is None:
-            self.callback(*self.callback_args)
+        if self.timer is None and self.callback is not None:
             self.timer = GObject.timeout_add_seconds(self.timeout, self._timer_callback)
+            self._timer_callback()
 
     def monitor_stop(self) -> None:
         """Stop monitoring changes of GPU states."""
@@ -194,6 +198,6 @@ class NvidiaMonitor():
 
     def _timer_callback(self):
         # Do not call a callback if timer has been stopped
-        if self.timer is not None:
+        if self.timer is not None and self.callback is not None:
             self.callback(*self.callback_args)
         return True

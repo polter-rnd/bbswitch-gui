@@ -19,6 +19,8 @@
 
 # pylint: disable=invalid-name,import-outside-toplevel
 
+"""Executable script for running bbswitch-gui tool."""
+
 import importlib.util
 import sys
 

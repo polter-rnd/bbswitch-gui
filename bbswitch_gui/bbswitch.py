@@ -1,7 +1,7 @@
 """Module containing utilities for monitoring bbswitch states."""
 
 from typing import Any, Callable, Optional, Tuple
-from gi.repository import Gio, GLib
+from gi.repository import Gio, GLib  # pyright: ignore
 
 BBSWITCH_PATH = '/proc/acpi/bbswitch'       # Path to bbswitch control file
 BBSWITCHD_SOCK = '/var/run/bbswitchd.sock'  # Path to bbswitchd socket
@@ -14,11 +14,11 @@ class BBswitchClientException(Exception):
 class BBswitchClient():
     """Communicates with bbswitchd to change GPU state."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize client for bbswitchd."""
-        self._cancellable = None
+        self._cancellable: Optional[Gio.Cancellable] = None
 
-    def _socket_init(self):
+    def _socket_init(self) -> Gio.SocketClient:
         client = Gio.SocketClient()
         client.set_socket_type(Gio.SocketType.DATAGRAM)
         client.set_local_address(Gio.UnixSocketAddress.new_with_type(
@@ -36,11 +36,11 @@ class BBswitchClient():
 
     def cancel(self) -> None:
         """Cancel pending operation if any."""
-        if self._cancellable is not None:
+        if self._cancellable:
             self._cancellable.cancel()
             self._cancellable = None
 
-    def send_command(self, command: str) -> str:
+    def send_command(self, command: str) -> Optional[str]:
         """Send arbitary command to bbswitchd.
 
         Call is synchronous.
@@ -54,10 +54,10 @@ class BBswitchClient():
             conn.get_output_stream().write_bytes(
                 GLib.Bytes.new(command.encode('ascii') + b'\0'))
             gdata = conn.get_input_stream().read_bytes(1024)
-            data = gdata.get_data() if gdata is not None else b'\0'
-        except GLib.GError as err:
-            raise BBswitchClientException(err.message) from err  # pylint: disable=no-member
-        return data.decode()
+            data = gdata.get_data() if gdata else None
+        except GLib.GError as err:  # type: ignore
+            raise BBswitchClientException(err.message) from err  # type: ignore
+        return data.decode() if data else None
 
     def set_gpu_state(self, state: bool,
                       on_finished: Callable[[Optional[BBswitchClientException]], None]) -> None:
@@ -93,19 +93,19 @@ class BBswitchClient():
                 self._cancellable,
                 self._on_read_finished,
                 on_finished)
-        except GLib.GError as err:
+        except GLib.GError as err:  # type: ignore
             self._cancellable = None
-            on_finished(BBswitchClientException(err.message))  # pylint: disable=no-member
+            on_finished(BBswitchClientException(err.message))  # type: ignore
 
     def _on_read_finished(self, stream, result, on_finished):
         error = None
         try:
             gdata = stream.read_bytes_finish(result)
-            data = gdata.get_data() if gdata is not None else None
-            if data is not None and data != b'\0':
+            data = gdata.get_data() if gdata else None
+            if data and data != b'\0':
                 error = BBswitchClientException(data.decode())
-        except GLib.GError as err:
-            error = BBswitchClientException(err.message)  # pylint: disable=no-member
+        except GLib.GError as err:  # type: ignore
+            error = BBswitchClientException(err.message)  # type: ignore
 
         self._cancellable = None
         on_finished(error)
@@ -118,13 +118,13 @@ class BBswitchMonitorException(Exception):
 class BBswitchMonitor:
     """Wrapper for monitoring bbswitch module status."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize file monitoring for BBSWITCH_PATH."""
         self.file = Gio.File.new_for_path(BBSWITCH_PATH)
         self.monitor = self.file.monitor_file(Gio.FileMonitorFlags.NONE, None)
-        self.connection = None
-        self.callback = None
-        self.callback_args = None
+        self.connection: Optional[int] = None
+        self.callback: Optional[Callable] = None
+        self.callback_args: Tuple[Any, ...] = ()
 
     def get_gpu_state(self) -> Tuple[str, bool]:
         """Return a tuple with PCI bus ID and it's enabled state (`True` or `False`).
@@ -134,8 +134,8 @@ class BBswitchMonitor:
         """
         try:
             _, contents, _ = self.file.load_contents()
-        except GLib.GError as err:
-            raise BBswitchMonitorException(err.message) from err  # pylint: disable=no-member
+        except GLib.GError as err:  # type: ignore
+            raise BBswitchMonitorException(err.message) from err  # type: ignore
 
         for line in contents.decode().splitlines():
             space = line.find(' ')
@@ -172,7 +172,7 @@ class BBswitchMonitor:
             self.monitor.disconnect(self.connection)
             self.connection = None
             self.callback = None
-            self.callback_args = None
+            self.callback_args = ()
 
     def _on_monitor_event_changed(self, monitor, file, other_file, event_type):
         del monitor, file, other_file  # unused arguments

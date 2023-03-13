@@ -1,6 +1,7 @@
 """Module containing utilities for PCI subsystem."""
 
-from typing import Tuple
+from typing import cast
+from typing import Tuple, Dict, Union
 
 
 class PCIUtilException(Exception):
@@ -54,7 +55,8 @@ class PCIUtil:
                  e.g. `('NVIDIA Corporation', 'GP106M [GeForce GTX 1060 Mobile]')`
         :raises: :class:`PCIUtilException` on failure
         """
-        ids_lib = {}
+        ids_lib: Dict[str, Dict[str, Union[Dict[str, str], str]]] = {}
+        temp_vendor = ''
         try:
             with open('/usr/share/hwdata/pci.ids', encoding='utf-8') as file:
                 for line in file:
@@ -69,12 +71,14 @@ class PCIUtil:
 
                     if line.startswith('\t\t') or line.startswith('\n'):
                         continue
-                    if line.startswith('\t'):
-                        ids_lib[temp_vendor][line.split()[0]] = {'name': ' '.join(line.split()[1:])}
+                    if line.startswith('\t') and temp_vendor:
+                        ids_lib[temp_vendor][line.split()[0]] \
+                            = {'name': ' '.join(line.split()[1:])}
         except OSError as err:
             raise PCIUtilException(err) from err
 
         if vendor not in ids_lib or device not in ids_lib[vendor]:
             raise PCIUtilException(f'Name not found for PCI device {vendor}:{device}')
 
-        return ids_lib[vendor]['name'], ids_lib[vendor][device]['name']
+        return str(ids_lib[vendor]['name']), \
+            cast(Dict[str, str], ids_lib[vendor][device])['name']

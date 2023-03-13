@@ -3,9 +3,11 @@
 import time
 import logging
 
+from typing import Optional
+
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import GLib, Gio, Gtk
+from gi.repository import GLib, Gio, Gtk  # pyright: ignore
 
 from .pciutil import PCIUtil, PCIUtilException
 from .bbswitch import BBswitchClient, BBswitchClientException
@@ -25,14 +27,14 @@ MODULE_LOAD_TIMEOUT = 10  # Maximum time until warning will show, in seconds
 class Application(Gtk.Application):
     """Main application class allowing only one running instance."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize application instance, setup command line handler."""
         super().__init__(
             *args,
             application_id='io.github.polter-rnd.bbswitch-gui',
             flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
             **kwargs
-        )
+        )  # type: ignore
 
         self.add_main_option(
             'verbose',
@@ -43,13 +45,13 @@ class Application(Gtk.Application):
             None,
         )
 
-        self.window = None
+        self.window: Optional[MainWindow] = None
         self.bbswitch = BBswitchMonitor()
         self.client = BBswitchClient()
         self.nvidia = NvidiaMonitor(timeout=REFRESH_TIMEOUT)
 
         # Timestamp of last state switching
-        self._state_switched_ts = 0
+        self._state_switched_ts = 0.0
 
         # Ping server so it will load bbswitch module
         try:
@@ -60,9 +62,10 @@ class Application(Gtk.Application):
     def update_bbswitch(self) -> None:
         """Update GPU state from `bbswitch` module."""
         logging.debug('Got update from bbswitch')
-        self.window.reset()
+        if self.window:
+            self.window.reset()
 
-        device, vendor = None, None
+        bus_id, enabled, device, vendor = '', False, '', ''
         try:
             bus_id, enabled = self.bbswitch.get_gpu_state()
             vendor, device = PCIUtil.get_device_info(PCIUtil.get_vendor_id(bus_id),
@@ -86,7 +89,7 @@ class Application(Gtk.Application):
             logger.debug('Adapter %s is OFF', bus_id)
             self.nvidia.monitor_stop()
 
-    def update_nvidia(self, bus_id) -> None:
+    def update_nvidia(self, bus_id: str) -> None:
         """Update GPU info from `nvidia` module.
 
         :param bus_id: PCI bus ID of NVIDIA GPU
@@ -137,9 +140,9 @@ class Application(Gtk.Application):
         :return: Exit status to fill after processing the command line
         """
         (command_line,) = args
-        options = command_line.get_options_dict()
+
         # convert GVariantDict -> GVariant -> dict
-        options = options.end().unpack()
+        options = command_line.get_options_dict().end().unpack()
 
         if 'verbose' in options:
             logging.getLogger().setLevel(logging.DEBUG)
@@ -148,17 +151,19 @@ class Application(Gtk.Application):
         self.activate()
         return 0
 
-    def _on_state_switch_finish(self, error: BBswitchClientException = None):
+    def _on_state_switch_finish(self, error: Optional[BBswitchClientException] = None):
         if error is not None:
             logger.error(error)
             self.update_bbswitch()
-            self.window.error_dialog('Failed to switch power state', str(error))
+            if self.window:
+                self.window.error_dialog('Failed to switch power state', str(error))
         else:
             # Save timestamp when power state has switched
             self._state_switched_ts = time.monotonic()
-        self.window.set_cursor_arrow()
+        if self.window:
+            self.window.set_cursor_arrow()
 
-    def _on_state_switch(self, window, state):
+    def _on_state_switch(self, window: MainWindow, state: bool):
         if self.client.in_progress():
             self.client.cancel()
             return

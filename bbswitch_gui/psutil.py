@@ -1,7 +1,7 @@
 """Module containing utilities for process management."""
 
 import os
-import subprocess
+import subprocess  # nosec
 from typing import List
 
 
@@ -29,7 +29,7 @@ class PSUtil:
             raise PSUtilException(err) from err
 
     @staticmethod
-    def get_fuser_pids(fname) -> List[int]:
+    def get_fuser_pids(fname: str) -> List[int]:
         """Retrieve PIDs using certain file or device.
 
         Uses `fuser` utility internally.
@@ -39,7 +39,7 @@ class PSUtil:
         :raises: :class:`PSUtilException` on failure
         """
         try:
-            proc = subprocess.run(['fuser', fname],
+            proc = subprocess.run(['/usr/sbin/fuser', fname],  # nosec
                                   capture_output=True,
                                   check=True)
         except subprocess.CalledProcessError as err:
