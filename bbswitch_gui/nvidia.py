@@ -189,8 +189,8 @@ class NvidiaMonitor():
                             modules.append(parts[0])
                         elif line.startswith('nouveau'):
                             raise NvidiaMonitorException(
-                                'Nouveau is not supported. '
-                                'Please install NVIDIA proprietary driver!'
+                                'Nouveau is not supported, '
+                                'please install NVIDIA proprietary driver.'
                             )
         except OSError as err:
             raise NvidiaMonitorException(err) from err
