@@ -128,7 +128,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         # Helper to convert memory in megabytes to string
         def format_mem(mem: int) -> str:
-            return f'{mem} MiB' if mem else 'N/A'
+            return f'{mem} MiB' if mem != -1 else 'N/A'
 
         # Update GPU parameters
         self.temperature_label.set_text(str(gpu_info['gpu_temp']) + ' °C')

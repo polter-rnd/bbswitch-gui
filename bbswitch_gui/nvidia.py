@@ -1,5 +1,6 @@
 """Module containing utilities for monitoring NVIDIA GPUs."""
 
+import logging
 from typing import Any, Callable, List, TypedDict, Optional, Tuple
 from gi.repository import GObject  # pyright: ignore
 
@@ -11,6 +12,8 @@ except ImportError:
 from .psutil import PSUtil, PSUtilException
 
 NVIDIA_DEV = '/dev/nvidia0'  # Path to NVIDIA device
+
+logger = logging.getLogger(__name__)
 
 
 class NVidiaGpuProcessInfo(TypedDict):
@@ -130,22 +133,28 @@ class NvidiaMonitor():
                     # If process was already added (like in case of C+G type)
                     if next((p for p in res['processes'] if p['pid'] == proc.pid), None):
                         continue
-                    res['processes'].append({
-                        'pid': proc.pid,
-                        'mem_used': round(proc.usedGpuMemory / 1024 / 1024),
-                        'cmdline': PSUtil.get_cmdline(proc.pid)
-                    })
+                    try:
+                        res['processes'].append({
+                            'pid': proc.pid,
+                            'mem_used': round(proc.usedGpuMemory / 1024 / 1024),
+                            'cmdline': PSUtil.get_cmdline(proc.pid)
+                        })
+                    except PSUtilException as err:
+                        logger.warning(err)
                 # Add all fuser PIDs that were not present in NVML
                 for pid in fuser_pids:
-                    res['processes'].append({
-                        'pid': pid,
-                        'mem_used': 0,
-                        'cmdline': PSUtil.get_cmdline(pid)
-                    })
+                    try:
+                        res['processes'].append({
+                            'pid': pid,
+                            'mem_used': -1,
+                            'cmdline': PSUtil.get_cmdline(pid)
+                        })
+                    except PSUtilException as err:
+                        logger.warning(err)
 
                 return res
-        except (pynvml.NVMLError, PSUtilException) as err:
-            if err.value == pynvml.NVML_ERROR_DRIVER_NOT_LOADED:  # type: ignore
+        except pynvml.NVMLError as err:
+            if err.value == pynvml.NVML_ERROR_DRIVER_NOT_LOADED:
                 # If driver is not loaded, just ignore this and return None
                 return None
 
