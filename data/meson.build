@@ -6,7 +6,8 @@ install_data([
     'icons/bbswitch-gpu-symbolic.svg',
     'icons/bbswitch-power-symbolic.svg',
     'icons/bbswitch-ram-symbolic.svg',
-    'icons/bbswitch-temp-symbolic.svg'
+    'icons/bbswitch-temp-symbolic.svg',
+    'icons/bbswitch-tray-symbolic.svg'
 ], install_dir : icondir / 'status')
 
 install_data('icons/bbswitch-gui.svg',

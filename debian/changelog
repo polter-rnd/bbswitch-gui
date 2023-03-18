@@ -1,3 +1,9 @@
+bbswitch-gui (0.1.5-1) UNRELEASED; urgency=medium
+
+  * Hotfix: added missing icon
+
+ -- Pavel Artsishevsky <polter.rnd@gmail.com>  Sat, 18 Mar 2023 21:27:38 +0300
+
 bbswitch-gui (0.1.4-1) UNRELEASED; urgency=medium
 
   * Update UI, refine icons
