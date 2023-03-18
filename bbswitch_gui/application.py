@@ -77,11 +77,11 @@ class Application(Gtk.Application):
             self.window.reset()
 
         self._enabled_gpu = None
-        bus_id, enabled, device = '', False, ''
+        bus_id, enabled, device, vendor = '', False, '', ''
         try:
             bus_id, enabled = self.bbswitch.get_gpu_state()
-            _, device = PCIUtil.get_device_info(PCIUtil.get_vendor_id(bus_id),
-                                                PCIUtil.get_device_id(bus_id))
+            vendor, device = PCIUtil.get_device_info(PCIUtil.get_vendor_id(bus_id),
+                                                     PCIUtil.get_device_id(bus_id))
         except BBswitchMonitorException as err:
             message = str(err)
             logger.error(message)
@@ -98,7 +98,7 @@ class Application(Gtk.Application):
             self.indicator.set_state(enabled)
 
         if self.window:
-            self.window.update_header(bus_id, enabled, device)
+            self.window.update_header(bus_id, enabled, vendor, device)
 
         if enabled:
             logger.debug('Adapter %s is ON', bus_id)

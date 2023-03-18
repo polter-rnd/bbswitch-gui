@@ -90,7 +90,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.toggle_button.set_sensitive(False)
         self.processes_store.clear()
 
-    def update_header(self, bus_id: str, enabled: bool, device: str) -> None:
+    def update_header(self, bus_id: str, enabled: bool, vendor: str, device: str) -> None:
         """Update headerbar for selected GPU.
 
         :param bus_id: PCI bus ID
@@ -111,6 +111,9 @@ class MainWindow(Gtk.ApplicationWindow):
         else:
             self.header_bar.set_title(
                 device[device.find('[') + 1:device.find(']')])  # type: ignore
+
+        if vendor is not None:
+            self.header_bar.set_subtitle(vendor)
 
     def update_monitor(self, gpu_info: NVidiaGpuInfo) -> None:
         """Update UI for selected GPU.
