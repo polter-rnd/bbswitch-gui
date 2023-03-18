@@ -71,6 +71,26 @@ class NvidiaMonitor():
         self.callback: Optional[Callable] = None
         self.callback_args: Tuple[Any, ...] = ()
 
+    def _add_process(self, processes, pid, mem_used):
+        try:
+            processes.append({
+                'pid': pid,
+                'mem_used': mem_used,
+                'cmdline': PSUtil.get_cmdline(pid)
+            })
+        except PSUtilException as err:
+            logger.warning(err)
+            return False
+        return True
+
+    def _check_bus_id(self, pci_info, bus_id):
+        if hasattr(pci_info, 'busIdLegacy'):
+            if pci_info.busIdLegacy != bus_id:
+                return False
+        elif pci_info.busId != bus_id.encode():
+            return False
+        return True
+
     def gpu_info(self, bus_id: str) -> Optional[NVidiaGpuInfo]:
         """Return NVIDIA GPU information.
 
@@ -92,21 +112,16 @@ class NvidiaMonitor():
         # Currently loaded NVIDIA kernel modules
         res['modules'] = self._get_modules()
 
-        nvml_initialized = False
+        device_count = -1
         try:
             pynvml.nvmlInit()
-            nvml_initialized = True
 
             device_count = pynvml.nvmlDeviceGetCount()
-
             for i in range(0, device_count):
                 handle = pynvml.nvmlDeviceGetHandleByIndex(i)
                 pci_info = pynvml.nvmlDeviceGetPciInfo(handle)
 
-                if hasattr(pci_info, 'busIdLegacy'):
-                    if pci_info.busIdLegacy != bus_id:
-                        continue
-                elif pci_info.busId != bus_id.encode():
+                if not self._check_bus_id(pci_info, bus_id):
                     continue
 
                 mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
@@ -133,24 +148,13 @@ class NvidiaMonitor():
                     # If process was already added (like in case of C+G type)
                     if next((p for p in res['processes'] if p['pid'] == proc.pid), None):
                         continue
-                    try:
-                        res['processes'].append({
-                            'pid': proc.pid,
-                            'mem_used': round(proc.usedGpuMemory / 1024 / 1024),
-                            'cmdline': PSUtil.get_cmdline(proc.pid)
-                        })
-                    except PSUtilException as err:
-                        logger.warning(err)
+                    self._add_process(res['processes'],
+                                      proc.pid,
+                                      round(proc.usedGpuMemory / 1024 / 1024))
+
                 # Add all fuser PIDs that were not present in NVML
                 for pid in fuser_pids:
-                    try:
-                        res['processes'].append({
-                            'pid': pid,
-                            'mem_used': -1,
-                            'cmdline': PSUtil.get_cmdline(pid)
-                        })
-                    except PSUtilException as err:
-                        logger.warning(err)
+                    self._add_process(res['processes'], pid, -1)
 
                 return res
         except pynvml.NVMLError as err:
@@ -161,7 +165,7 @@ class NvidiaMonitor():
             raise NvidiaMonitorException(f'NVMLError: {err}') from err
         finally:
             # Don't forget to release resources
-            if nvml_initialized:
+            if device_count != -1:
                 pynvml.nvmlShutdown()
 
         raise NvidiaMonitorException(f'GPU {bus_id} not found in nvidia-smi')
