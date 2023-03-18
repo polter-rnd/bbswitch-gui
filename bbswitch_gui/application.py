@@ -29,6 +29,10 @@ MODULE_LOAD_TIMEOUT = 5  # How long to wait until nvidia module become accessibl
 class Application(Gtk.Application):
     """Main application class allowing only one running instance."""
 
+    bbswitch = BBswitchMonitor()
+    client = BBswitchClient()
+    nvidia = NvidiaMonitor(timeout=REFRESH_TIMEOUT)
+
     def __init__(self, *args, **kwargs) -> None:
         """Initialize application instance, setup command line handler."""
         super().__init__(
@@ -61,10 +65,6 @@ class Application(Gtk.Application):
         self.gpu_info: Optional[NVidiaGpuInfo] = None
         self.window: Optional[MainWindow] = None
         self.indicator: Optional[Indicator] = None
-
-        self.bbswitch = BBswitchMonitor()
-        self.client = BBswitchClient()
-        self.nvidia = NvidiaMonitor(timeout=REFRESH_TIMEOUT)
 
     def update_bbswitch(self) -> None:
         """Update GPU state from `bbswitch` module."""
