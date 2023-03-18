@@ -50,15 +50,6 @@ class Application(Gtk.Application):
         self.client = BBswitchClient()
         self.nvidia = NvidiaMonitor(timeout=REFRESH_TIMEOUT)
 
-        # Timestamp of last state switching
-        self._state_switched_ts = 0.0
-
-        # Ping server so it will load bbswitch module
-        try:
-            self.client.send_command('status')
-        except BBswitchClientException as err:
-            logging.warning(err)
-
     def update_bbswitch(self) -> None:
         """Update GPU state from `bbswitch` module."""
         logging.debug('Got update from bbswitch')
@@ -85,12 +76,12 @@ class Application(Gtk.Application):
 
         if enabled:
             logger.debug('Adapter %s is ON', bus_id)
-            self.nvidia.monitor_start(self.update_nvidia, bus_id)
+            self.nvidia.monitor_start(self.update_nvidia, bus_id, time.monotonic())
         else:
             logger.debug('Adapter %s is OFF', bus_id)
             self.nvidia.monitor_stop()
 
-    def update_nvidia(self, bus_id: str) -> None:
+    def update_nvidia(self, bus_id: str, enabled_ts: float) -> None:
         """Update GPU info from `nvidia` module.
 
         :param bus_id: PCI bus ID of NVIDIA GPU
@@ -102,7 +93,7 @@ class Application(Gtk.Application):
             if self.window:
                 if info is None:
                     # None return value means no kernel modules available
-                    if time.monotonic() - self._state_switched_ts > MODULE_LOAD_TIMEOUT:
+                    if time.monotonic() - enabled_ts > MODULE_LOAD_TIMEOUT:
                         # If it took really long time, display warning
                         self.window.show_warning(
                             'NVIDIA kernel modules are not loaded. '
