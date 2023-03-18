@@ -7,7 +7,10 @@ install_data([
     'icons/bbswitch-power-symbolic.svg',
     'icons/bbswitch-ram-symbolic.svg',
     'icons/bbswitch-temp-symbolic.svg',
-    'icons/bbswitch-tray-symbolic.svg'
+    'icons/bbswitch-tray-symbolic.svg',
+    'icons/bbswitch-tray-active-symbolic.svg',
+    'icons/bbswitch-off-symbolic.svg',
+    'icons/bbswitch-on-symbolic.svg'
 ], install_dir : icondir / 'status')
 
 install_data('icons/bbswitch-gui.svg',
@@ -18,8 +21,8 @@ desktop_file_conf.set('BINDIR', get_option('prefix') / get_option('bindir'))
 
 configure_file(
     configuration : desktop_file_conf,
-    input : 'bbswitch-gui.desktop.in',
-    output : 'bbswitch-gui.desktop',
+    input : 'io.github.polter-rnd.bbswitch-gui.desktop.in',
+    output : 'io.github.polter-rnd.bbswitch-gui.desktop',
     install : true,
     install_dir : datadir / 'applications'
 )

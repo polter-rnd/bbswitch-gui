@@ -2,7 +2,7 @@
 
 import logging
 from typing import Any, Callable, List, TypedDict, Optional, Tuple
-from gi.repository import GObject  # pyright: ignore
+from gi.repository import GLib, GObject  # pyright: ignore
 
 try:
     import pynvml  # pyright: ignore
@@ -209,4 +209,4 @@ class NvidiaMonitor():
         # Do not call a callback if timer has been stopped
         if self.timer is not None and self.callback is not None:
             self.callback(*self.callback_args)
-        return True
+        return GLib.SOURCE_CONTINUE

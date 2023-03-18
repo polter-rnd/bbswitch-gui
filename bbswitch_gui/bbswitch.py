@@ -180,4 +180,4 @@ class BBswitchMonitor:
             # Do not call a callback if monitor has been stopped
             if self.callback is not None:
                 self.callback(*self.callback_args)
-        return True
+        return GLib.SOURCE_CONTINUE

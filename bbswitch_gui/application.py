@@ -2,6 +2,7 @@
 
 import time
 import logging
+import signal
 
 from typing import Optional
 
@@ -12,16 +13,17 @@ from gi.repository import GLib, Gio, Gtk  # pyright: ignore
 from .pciutil import PCIUtil, PCIUtilException
 from .bbswitch import BBswitchClient, BBswitchClientException
 from .bbswitch import BBswitchMonitor, BBswitchMonitorException
-from .nvidia import NvidiaMonitor, NvidiaMonitorException
+from .nvidia import NVidiaGpuInfo, NvidiaMonitor, NvidiaMonitorException
 from .window import MainWindow
+from .indicator import Indicator
 
 # Setup logger
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s \033[1m%(levelname)s\033[0m %(message)s')
 logger = logging.getLogger(__name__)
 
-REFRESH_TIMEOUT = 1       # How often to refresh data, in seconds
-MODULE_LOAD_TIMEOUT = 10  # Maximum time until warning will show, in seconds
+REFRESH_TIMEOUT = 1      # How often to refresh nvidia monitor data, in seconds
+MODULE_LOAD_TIMEOUT = 5  # How long to wait until nvidia module become accessible, in seconds
 
 
 class Application(Gtk.Application):
@@ -44,8 +46,22 @@ class Application(Gtk.Application):
             'Enable debug logging',
             None,
         )
+        self.add_main_option(
+            'minimize',
+            ord('m'),
+            GLib.OptionFlags.NONE,
+            GLib.OptionArg.NONE,
+            'Minimize to system tray',
+            None,
+        )
 
+        self._enabled_gpu: Optional[str] = None
+        self._bg_notification_shown = False
+
+        self.gpu_info: Optional[NVidiaGpuInfo] = None
         self.window: Optional[MainWindow] = None
+        self.indicator: Optional[Indicator] = None
+
         self.bbswitch = BBswitchMonitor()
         self.client = BBswitchClient()
         self.nvidia = NvidiaMonitor(timeout=REFRESH_TIMEOUT)
@@ -53,6 +69,10 @@ class Application(Gtk.Application):
     def update_bbswitch(self) -> None:
         """Update GPU state from `bbswitch` module."""
         logging.debug('Got update from bbswitch')
+
+        if self.indicator:
+            self.indicator.reset()
+
         if self.window:
             self.window.reset()
 
@@ -63,20 +83,28 @@ class Application(Gtk.Application):
             _, device = PCIUtil.get_device_info(PCIUtil.get_vendor_id(bus_id),
                                                 PCIUtil.get_device_id(bus_id))
         except BBswitchMonitorException as err:
-            logger.error(err)
+            message = str(err)
+            logger.error(message)
             self.nvidia.monitor_stop()
             if self.window:
-                self.window.show_error(str(err))
+                self.window.show_error(message)
+            if not self.window or not self.window.is_active():
+                self._notify_error('BBswitch monitor error', message)
             return
         except PCIUtilException as err:
             logger.warning(err)
+
+        if self.indicator:
+            self.indicator.set_state(enabled)
 
         if self.window:
             self.window.update_header(bus_id, enabled, device)
 
         if enabled:
             logger.debug('Adapter %s is ON', bus_id)
-            self.nvidia.monitor_start(self.update_nvidia, bus_id, time.monotonic())
+            self._enabled_gpu = bus_id
+            if self.window and self.window.is_visible():
+                self.nvidia.monitor_start(self.update_nvidia, bus_id, time.monotonic())
         else:
             logger.debug('Adapter %s is OFF', bus_id)
             self.nvidia.monitor_stop()
@@ -89,9 +117,9 @@ class Application(Gtk.Application):
         logging.debug('Got update from nvidia-smi')
 
         try:
-            info = self.nvidia.gpu_info(bus_id)
+            self.gpu_info = self.nvidia.gpu_info(bus_id)
             if self.window:
-                if info is None:
+                if self.gpu_info is None:
                     # None return value means no kernel modules available
                     if time.monotonic() - enabled_ts > MODULE_LOAD_TIMEOUT:
                         # If it took really long time, display warning
@@ -102,28 +130,56 @@ class Application(Gtk.Application):
                         # Otherwise it's normal, loading modules can take some time
                         self.window.show_info('Loading NVIDIA kernel modules...')
                 else:
-                    self.window.update_monitor(info)
+                    self.window.update_monitor(self.gpu_info)
         except NvidiaMonitorException as err:
             message = str(err)
             logger.error(message)
             if self.window:
                 self.window.show_error(message)
+            if not self.window or not self.window.is_active():
+                self._notify_error('NVIDIA monitor error', message)
 
     def do_startup(self, *args, **kwargs) -> None:
         """Handle application startup."""
         Gtk.Application.do_startup(self)
+
+        action = Gio.SimpleAction.new('activate', None)
+        action.connect('activate', self._on_activate)  # type: ignore
+        self.add_action(action)  # type: ignore
+
+        action = Gio.SimpleAction.new('exit', None)
+        action.connect('activate', self._on_quit)  # type: ignore
+        self.add_action(action)  # type: ignore
+
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, self._on_quit)
 
     def do_activate(self, *args, **kwargs) -> None:
         """Initialize GUI.
 
         We only allow a single window and raise any existing ones
         """
+        if not self.indicator:
+            self.indicator = Indicator()
+            self.indicator.connect('open-requested', self._on_activate)
+            self.indicator.connect('exit-requested', self._on_quit)
+            self.indicator.connect('power-state-switch-requested', self._on_state_switch)
+
         if not self.window:
             self.window = MainWindow(self)
             self.window.connect('power-state-switch-requested', self._on_state_switch)
-            self.bbswitch.monitor_start(self.update_bbswitch)
+            self.window.connect('delete-event', self._on_window_close)
+            self.window.connect('show', self._on_window_show)
+            self.window.connect('hide', self._on_window_hide)
 
-        self.window.present()
+            # Ping server so it will load bbswitch module
+            try:
+                self.client.send_command('status')
+            except BBswitchClientException as err:
+                logging.error(err)
+
+            self.bbswitch.monitor_start(self.update_bbswitch)
+        else:
+            self.window.present()
 
     def do_command_line(self, *args: Gio.ApplicationCommandLine, **kwargs) -> int:
         """Handle command line arguments.
@@ -141,25 +197,83 @@ class Application(Gtk.Application):
             logger.debug('Verbose output enabled')
 
         self.activate()
+
+        if self.window:
+            if 'minimize' in options:
+                self.window.hide()
+            else:
+                self.window.show()
+
         return 0
 
-    def _on_state_switch_finish(self, error: Optional[BBswitchClientException] = None):
+    def _on_activate(self, widget=None, data=None):
+        del widget, data  # unused arguments
+        self.do_activate()
+        return GLib.SOURCE_CONTINUE
+
+    def _on_quit(self, widget=None, data=None):
+        del widget, data  # unused arguments
+        self.quit()
+        return GLib.SOURCE_REMOVE
+
+    def _on_state_switch_finish(self, error):
         if error is not None:
-            logger.error(error)
+            logger.error(str(error))
             self.update_bbswitch()
             if self.window:
-                self.window.error_dialog('Failed to switch power state', str(error))
+                self._notify_error('Failed to switch power state', str(error))
         if self.window:
             self.window.set_cursor_arrow()
 
-    def _on_state_switch(self, window: MainWindow, state: bool):
+    def _on_state_switch(self, widget, state):
+        del widget  # unused argument
         if self.client.in_progress():
             self.client.cancel()
             return
 
-        # Save timestamp when power state change was requested
-        self._state_switched_ts = time.monotonic()
+        if self.gpu_info and len(self.gpu_info['processes']) > 0:
+            if self.window:
+                self._notify_error('NVIDIA GPU is in use',
+                                   'Please stop processes using it first')
+            return
 
         # Switch to opposite state
         self.client.set_gpu_state(state, self._on_state_switch_finish)
-        window.set_cursor_busy()
+        if self.window:
+            self.window.set_cursor_busy()
+
+    def _notify_error(self, title, message):
+        if self.window and self.window.is_active():
+            self.window.error_dialog(title, message)
+        else:
+            notification = Gio.Notification()
+            notification.set_title(title)
+            notification.set_body(message)
+            notification.set_default_action('app.activate')
+            notification.add_button('Open Window', 'app.activate')
+            self.send_notification('', notification)
+
+    def _on_window_show(self, window):
+        del window  # unused argument
+        self.withdraw_notification('')
+        if self._enabled_gpu:
+            self.nvidia.monitor_start(self.update_nvidia,
+                                      self._enabled_gpu,
+                                      time.monotonic())
+
+    def _on_window_hide(self, window):
+        del window  # unused argument
+        self.nvidia.monitor_stop()
+
+    def _on_window_close(self, window, event):
+        del event  # unused argument
+        if not self._bg_notification_shown:
+            notification = Gio.Notification()
+            notification.set_title('BBswitch GUI stays in background')
+            notification.set_body('Could be accessed through system tray')
+            notification.set_default_action('app.activate')
+            notification.add_button('Open Window', 'app.activate')
+            notification.add_button('Exit', 'app.exit')
+            self.send_notification('', notification)
+            self._bg_notification_shown = True
+        return window.hide_on_delete()

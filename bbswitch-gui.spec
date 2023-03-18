@@ -16,6 +16,7 @@ BuildRequires:  python3-py3nvml
 
 Requires:       bbswitchd
 Requires:       gtk3
+Requires:       libappindicator-gtk3
 Requires:       python3-gobject
 Requires:       python3-py3nvml
 Requires:       psmisc
@@ -48,7 +49,7 @@ without need to keep graphics adapter turned on all the time.
 %license LICENSE
 %{_bindir}/bbswitch-gui
 %{python3_sitelib}/bbswitch_gui/*
-%{_datadir}/applications/bbswitch-gui.desktop
+%{_datadir}/applications/io.github.polter-rnd.bbswitch-gui.desktop
 %{_datadir}/icons/hicolor/scalable/status/*-symbolic.svg
 %{_datadir}/icons/hicolor/scalable/apps/bbswitch-gui.svg
 

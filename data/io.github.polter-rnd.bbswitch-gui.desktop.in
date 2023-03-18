@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=BBswitch GUI
+Comment=GUI tool for managing NVIDIA GPU power states and utilization
+Exec=@BINDIR@/bbswitch-gui
+Icon=bbswitch-gui
+Categories=System;Monitor;Utility;X-GNOME-Utilities;
+Keywords=nvidia;bbswitch;optimus;prime;
+X-AppInstall-Keywords=nvidia;bbswitch;optimus;prime;
+X-GNOME-Keywords=nvidia;bbswitch;optimus;prime;
+X-GNOME-UsesNotifications=true

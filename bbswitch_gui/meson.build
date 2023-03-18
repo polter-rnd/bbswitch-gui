@@ -19,7 +19,8 @@ py_sources = [
     'nvidia.py',
     'pciutil.py',
     'psutil.py',
-    'window.py'
+    'window.py',
+    'indicator.py'
 ]
 python.install_sources(py_sources,
     subdir : 'bbswitch_gui'

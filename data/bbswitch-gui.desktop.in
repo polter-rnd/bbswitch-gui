@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Encoding=UTF-8
-Name=BBswitch GUI
-Comment=GUI tool for managing NVIDIA GPU power states and utilization
-Exec=@BINDIR@/bbswitch-gui
-Icon=bbswitch-gui
-Categories=System;Settings;

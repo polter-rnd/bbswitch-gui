@@ -84,7 +84,6 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def reset(self) -> None:
         """Reset window to default state."""
-        self.header_bar.set_title('Toggle NVIDIA GPU power state')  # type: ignore
         self.state_switch.set_state(False)
         self.state_switch.set_sensitive(False)
         self.kill_button.set_sensitive(False)
@@ -132,7 +131,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.utilization_label.set_text(str(gpu_info['gpu_util']) + ' %')
 
         # Update existing PIDs
-        processes = gpu_info['processes']
+        processes = gpu_info['processes'].copy()
         i = self.processes_store.get_iter_first()
         while i is not None:
             i_next = self.processes_store.iter_next(i)
@@ -265,8 +264,5 @@ class MainWindow(Gtk.ApplicationWindow):
     @Gtk.Template.Callback()
     def _on_switch_released(self, switch: Gtk.Switch, gdata):
         del gdata  # unused argument
-        if self.processes_store.iter_n_children(None) > 0:
-            self.error_dialog('NVIDIA GPU is in use', 'Please stop processes using it first')
-        else:
-            self.emit('power-state-switch-requested', not switch.get_active())
+        self.emit('power-state-switch-requested', not switch.get_active())
         return True  # state of the switch is managed programmatically
