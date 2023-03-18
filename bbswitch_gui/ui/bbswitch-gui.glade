@@ -7,53 +7,6 @@
     <property name="can-focus">False</property>
     <property name="icon-name">edit-delete-symbolic</property>
   </object>
-  <object class="GtkPopoverMenu" id="modules_popover">
-    <property name="can-focus">False</property>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-start">18</property>
-        <property name="margin-end">18</property>
-        <property name="margin-top">12</property>
-        <property name="margin-bottom">12</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="label" translatable="yes">Modules loaded:</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="modules_label">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="submenu">submenu0</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-  </object>
   <object class="GtkListStore" id="processes_store">
     <columns>
       <!-- column-name pid -->
@@ -77,7 +30,6 @@
     <property name="width-request">600</property>
     <property name="height-request">400</property>
     <property name="can-focus">False</property>
-    <property name="type-hint">dialog</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -110,6 +62,7 @@
                 <child internal-child="content_area">
                   <object class="GtkBox">
                     <property name="can-focus">False</property>
+                    <property name="hexpand">True</property>
                     <property name="spacing">6</property>
                     <child>
                       <object class="GtkImage">
@@ -142,12 +95,71 @@
                     <property name="position">0</property>
                   </packing>
                 </child>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
               <packing>
                 <property name="name">error</property>
+                <property name="needs-attention">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkInfoBar" id="info_bar">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child internal-child="action_area">
+                  <object class="GtkButtonBox">
+                    <property name="can-focus">False</property>
+                    <property name="spacing">6</property>
+                    <property name="layout-style">end</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child internal-child="content_area">
+                  <object class="GtkBox">
+                    <property name="can-focus">False</property>
+                    <property name="hexpand">True</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">dialog-information-symbolic</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="info_label">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="ellipsize">end</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="name">info</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -349,69 +361,6 @@
               </object>
               <packing>
                 <property name="name">monitor</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkInfoBar" id="info_bar">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child internal-child="action_area">
-                  <object class="GtkButtonBox">
-                    <property name="can-focus">False</property>
-                    <property name="spacing">6</property>
-                    <property name="layout-style">end</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child internal-child="content_area">
-                  <object class="GtkBox">
-                    <property name="can-focus">False</property>
-                    <property name="spacing">6</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="icon-name">dialog-information-symbolic</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="info_label">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="ellipsize">end</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="name">info</property>
                 <property name="position">2</property>
               </packing>
             </child>
@@ -438,6 +387,7 @@
                 <child internal-child="content_area">
                   <object class="GtkBox">
                     <property name="can-focus">False</property>
+                    <property name="hexpand">True</property>
                     <property name="spacing">6</property>
                     <child>
                       <object class="GtkImage">
@@ -469,59 +419,11 @@
                     <property name="position">0</property>
                   </packing>
                 </child>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
               <packing>
                 <property name="name">warning</property>
                 <property name="position">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButtonBox">
-                <property name="can-focus">False</property>
-                <property name="spacing">6</property>
-                <property name="layout-style">end</property>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="can-focus">False</property>
-                <property name="spacing">6</property>
-                <child>
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="icon-name">info-symbolic</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="info_label2">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="ellipsize">end</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="position">5</property>
+                <property name="needs-attention">True</property>
               </packing>
             </child>
           </object>
@@ -632,15 +534,81 @@
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="has-subtitle">False</property>
+        <property name="spacing">0</property>
         <property name="show-close-button">True</property>
         <child>
           <object class="GtkSwitch" id="state_switch">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="valign">center</property>
             <signal name="button-release-event" handler="_on_switch_released" swapped="no"/>
           </object>
+        </child>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="halign">end</property>
+            <property name="valign">center</property>
+            <property name="hexpand">True</property>
+            <property name="ypad">6</property>
+            <property name="icon-name">bbswitch-tray-symbolic</property>
+            <property name="icon_size">3</property>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
         </child>
       </object>
     </child>
   </template>
+  <object class="GtkPopoverMenu" id="modules_popover">
+    <property name="can-focus">False</property>
+    <property name="relative-to">menu_button</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="margin-start">18</property>
+        <property name="margin-end">18</property>
+        <property name="margin-top">12</property>
+        <property name="margin-bottom">12</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Modules loaded:</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="modules_label">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="halign">start</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="submenu">submenu0</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+  </object>
 </interface>

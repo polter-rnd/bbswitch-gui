@@ -84,15 +84,14 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def reset(self) -> None:
         """Reset window to default state."""
-        self.header_bar.set_title('bbswitch-gui')  # type: ignore
-        self.header_bar.set_subtitle('')
+        self.header_bar.set_title('Toggle NVIDIA GPU power state')  # type: ignore
         self.state_switch.set_state(False)
         self.state_switch.set_sensitive(False)
         self.kill_button.set_sensitive(False)
         self.toggle_button.set_sensitive(False)
         self.processes_store.clear()
 
-    def update_header(self, bus_id: str, enabled: bool, vendor: str, device: str) -> None:
+    def update_header(self, bus_id: str, enabled: bool, device: str) -> None:
         """Update headerbar for selected GPU.
 
         :param bus_id: PCI bus ID
@@ -113,11 +112,6 @@ class MainWindow(Gtk.ApplicationWindow):
         else:
             self.header_bar.set_title(
                 device[device.find('[') + 1:device.find(']')])  # type: ignore
-
-        if vendor is None:
-            self.header_bar.set_subtitle('Additional PCI info is not available')
-        else:
-            self.header_bar.set_subtitle(vendor)
 
     def update_monitor(self, gpu_info: NVidiaGpuInfo) -> None:
         """Update UI for selected GPU.
