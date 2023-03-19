@@ -39,7 +39,7 @@ class PSUtil:
         :raises: :class:`PSUtilException` on failure
         """
         try:
-            proc = subprocess.run(['/usr/sbin/fuser', fname],  # nosec
+            proc = subprocess.run(['fuser', fname],  # nosec
                                   capture_output=True,
                                   check=True)
         except subprocess.CalledProcessError as err:
