@@ -1,5 +1,5 @@
 Name:           bbswitch-gui
-Version:        0.1.6
+Version:        0.1.7
 Release:        1%{?dist}
 Summary:        GUI for monitoring and toggling NVIDIA GPU power on Optimus laptops
 
@@ -55,6 +55,10 @@ without need to keep graphics adapter turned on all the time.
 
 
 %changelog
+* Sat Mar 19 2023 Pavel Artsishevsky <polter.rnd@gmail.com> - 0.1.7-1
+- Fix process monitor for Debian-based distros
+- Minor fixes and enhancements
+
 * Sat Mar 18 2023 Pavel Artsishevsky <polter.rnd@gmail.com> - 0.1.6-1
 - Add support for AppIndicator
 - Minimize application to tray instead of closing
