@@ -24,7 +24,7 @@ class Indicator(GObject.GObject):
         super().__init__(**kwargs)
 
         self._app_indicator = AppIndicator3.Indicator.new(
-            'customtray', '',
+            'customtray', 'bbswitch-tray-symbolic',
             AppIndicator3.IndicatorCategory.HARDWARE)
         self._app_indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
         self._app_indicator.set_menu(self._menu())
