@@ -55,7 +55,7 @@ without need to keep graphics adapter turned on all the time.
 
 
 %changelog
-* Sat Mar 19 2023 Pavel Artsishevsky <polter.rnd@gmail.com> - 0.1.7-1
+* Sun Mar 19 2023 Pavel Artsishevsky <polter.rnd@gmail.com> - 0.1.7-1
 - Fix process monitor for Debian-based distros
 - Minor fixes and enhancements
 

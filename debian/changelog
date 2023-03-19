@@ -3,7 +3,7 @@ bbswitch-gui (0.1.7-1) UNRELEASED; urgency=medium
   * Fix process monitor for Debian-based distros
   * Minor fixes and enhancements
 
- -- Pavel Artsishevsky <polter.rnd@gmail.com>  Sat, 19 Mar 2023 21:50:26 +0300
+ -- Pavel Artsishevsky <polter.rnd@gmail.com>  Sun, 19 Mar 2023 21:50:26 +0300
 
 bbswitch-gui (0.1.6-1) UNRELEASED; urgency=medium
 
