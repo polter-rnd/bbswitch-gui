@@ -175,7 +175,15 @@ class Application(Gtk.Application):
             try:
                 self.client.send_command('status')
             except BBswitchClientException as err:
-                logging.error(err)
+                message = str(err)
+                logging.error(message)
+                self.window.error_dialog(
+                    'BBswitch client error',
+                    message + '\n\n'
+                    + 'If this happened right after installation, check the following:\n'
+                    + ' • Service "bbswitchd" is enabled and running\n'
+                    + ' • Your user is in group "bbswitchd"\n'
+                    + ' • You have rebooted or restarted loginctl session')
 
             self.bbswitch.monitor_start(self.update_bbswitch)
         else:
@@ -200,6 +208,7 @@ class Application(Gtk.Application):
 
         if self.window:
             if 'minimize' in options:
+                self._bg_notification_shown = True
                 self.window.hide()
             else:
                 self.window.show()
@@ -251,11 +260,11 @@ class Application(Gtk.Application):
             notification.set_body(message)
             notification.set_default_action('app.activate')
             notification.add_button('Open Window', 'app.activate')
-            self.send_notification('', notification)
+            self.send_notification('error', notification)
 
     def _on_window_show(self, window):
         del window  # unused argument
-        self.withdraw_notification('')
+        self.withdraw_notification('running_in_bg')
         if self._enabled_gpu:
             self.nvidia.monitor_start(self.update_nvidia,
                                       self._enabled_gpu,
@@ -274,6 +283,6 @@ class Application(Gtk.Application):
             notification.set_default_action('app.activate')
             notification.add_button('Open Window', 'app.activate')
             notification.add_button('Exit', 'app.exit')
-            self.send_notification('', notification)
+            self.send_notification('running_in_bg', notification)
             self._bg_notification_shown = True
         return window.hide_on_delete()
