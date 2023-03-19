@@ -1,3 +1,10 @@
+bbswitch-gui (0.1.8-1) UNRELEASED; urgency=medium
+
+  * Set default icon for tray indicator
+  * Add scrollbars to processes table
+
+ -- Pavel Artsishevsky <polter.rnd@gmail.com>  Fri, 31 Mar 2023 20:51:43 +0300
+
 bbswitch-gui (0.1.7-1) UNRELEASED; urgency=medium
 
   * Fix process monitor for Debian-based distros
