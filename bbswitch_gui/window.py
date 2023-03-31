@@ -10,7 +10,7 @@ from pkg_resources import resource_filename
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
-from gi.repository import GObject, Gtk, Gdk, Pango  # pyright: ignore
+from gi.repository import GObject, Gtk, Gdk  # pyright: ignore
 
 from .nvidia import NVidiaGpuInfo
 
@@ -74,7 +74,6 @@ class MainWindow(Gtk.ApplicationWindow):
         self.memory_column.add_attribute(number_renderer, 'text', 1)
 
         text_renderer = Gtk.CellRendererText()
-        text_renderer.set_property('ellipsize', Pango.EllipsizeMode.END)
         self.name_column.pack_start(text_renderer, True)
         self.name_column.add_attribute(text_renderer, 'text', 2)
 
