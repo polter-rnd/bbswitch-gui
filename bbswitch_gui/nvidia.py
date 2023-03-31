@@ -158,7 +158,7 @@ class NvidiaMonitor():
 
                 return res
         except pynvml.NVMLError as err:
-            if err.value == pynvml.NVML_ERROR_DRIVER_NOT_LOADED:
+            if err.value == pynvml.NVML_ERROR_DRIVER_NOT_LOADED:  # type: ignore
                 # If driver is not loaded, just ignore this and return None
                 return None
 
