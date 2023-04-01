@@ -158,12 +158,6 @@ class Application(Gtk.Application):
 
         We only allow a single window and raise any existing ones
         """
-        if not self.indicator:
-            self.indicator = Indicator()
-            self.indicator.connect('open-requested', self._on_activate)
-            self.indicator.connect('exit-requested', self._on_quit)
-            self.indicator.connect('power-state-switch-requested', self._on_state_switch)
-
         if not self.window:
             self.window = MainWindow(self)
             self.window.connect('power-state-switch-requested', self._on_state_switch)
@@ -187,7 +181,13 @@ class Application(Gtk.Application):
 
             self.bbswitch.monitor_start(self.update_bbswitch)
         else:
-            self.window.present()
+            self.window.present_with_time(int(time.time()))
+
+        if not self.indicator:
+            self.indicator = Indicator()
+            self.indicator.connect('open-requested', self._on_activate)
+            self.indicator.connect('exit-requested', self._on_quit)
+            self.indicator.connect('power-state-switch-requested', self._on_state_switch)
 
     def do_command_line(self, *args: Gio.ApplicationCommandLine, **kwargs) -> int:
         """Handle command line arguments.
