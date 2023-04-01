@@ -40,8 +40,8 @@ class Indicator(GObject.GObject):
         self._enabled = enabled
         self._app_indicator.set_icon('bbswitch-tray-active-symbolic' if enabled else
                                      'bbswitch-tray-symbolic')
-        self._app_indicator.set_title('Giscrete GPU: On' if enabled else
-                                      'Giscrete GPU: Off')
+        self._app_indicator.set_title('Discrete GPU: On' if enabled else
+                                      'Discrete GPU: Off')
         self._switch_item.set_label('Turn GPU Off' if enabled else
                                     'Turn GPU On')
         self._switch_item.set_image(Gtk.Image.new_from_icon_name(
