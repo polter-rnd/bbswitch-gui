@@ -176,7 +176,7 @@ class Application(Gtk.Application):
                     message + '\n\n'
                     + 'If this happened right after installation, check the following:\n'
                     + ' • Service "bbswitchd" is enabled and running\n'
-                    + ' • Your user is in group "bbswitchd"\n'
+                    + ' • Active user is in effective group "bbswitchd"\n'
                     + ' • You have rebooted or restarted loginctl session')
         else:
             self.window.set_keep_above(True)
