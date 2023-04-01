@@ -222,6 +222,8 @@ class Application(Gtk.Application):
 
     def _on_quit(self, widget=None, data=None):
         del widget, data  # unused arguments
+        self.withdraw_notification('error')
+        self.withdraw_notification('running_in_bg')
         self.quit()
         return GLib.SOURCE_REMOVE
 
