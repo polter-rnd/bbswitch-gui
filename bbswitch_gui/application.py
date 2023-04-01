@@ -217,7 +217,9 @@ class Application(Gtk.Application):
 
     def _on_activate(self, widget=None, data=None):
         del widget, data  # unused arguments
-        self.do_activate()
+        if self.window:
+            self.window.deiconify()
+            self.window.present_with_time(int(time.time()))
         return GLib.SOURCE_CONTINUE
 
     def _on_quit(self, widget=None, data=None):
