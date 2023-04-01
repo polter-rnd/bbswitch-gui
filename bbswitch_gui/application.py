@@ -179,7 +179,10 @@ class Application(Gtk.Application):
                     + ' • Your user is in group "bbswitchd"\n'
                     + ' • You have rebooted or restarted loginctl session')
         else:
+            self.window.set_keep_above(True)
+            self.window.deiconify()
             self.window.present_with_time(int(time.time()))
+            self.window.set_keep_above(False)
 
         if not self.indicator:
             self.indicator = Indicator()
@@ -233,7 +236,6 @@ class Application(Gtk.Application):
     def _on_activate(self, widget=None, data=None):
         del widget, data  # unused arguments
         if self.window:
-            self.window.deiconify()
             self.activate()
         return GLib.SOURCE_CONTINUE
 
