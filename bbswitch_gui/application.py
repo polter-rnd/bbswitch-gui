@@ -178,8 +178,6 @@ class Application(Gtk.Application):
                     + ' • Service "bbswitchd" is enabled and running\n'
                     + ' • Your user is in group "bbswitchd"\n'
                     + ' • You have rebooted or restarted loginctl session')
-
-            self.bbswitch.monitor_start(self.update_bbswitch)
         else:
             self.window.present_with_time(int(time.time()))
 
@@ -204,13 +202,30 @@ class Application(Gtk.Application):
             logging.getLogger().setLevel(logging.DEBUG)
             logger.debug('Verbose output enabled')
 
+        # Is GUI initialized
+        initialized = self.window is not None
+
         self.activate()
 
         if self.window:
+            # Utility function for starting bbswitch monitor
+            def bbswitch_monitor_start(window=None, is_active=None):
+                if window:
+                    window.disconnect(connection)
+                    if not is_active or not window.get_property(is_active.name):
+                        return
+                self.bbswitch.monitor_start(self.update_bbswitch)
+
             if 'minimize' in options:
+                if not initialized:
+                    # Start bbswitch monitor right now
+                    bbswitch_monitor_start()
                 self._bg_notification_shown = True
                 self.window.hide()
             else:
+                if not initialized:
+                    # Start bbswitch monitor after window was activated
+                    connection = self.window.connect('notify::is-active', bbswitch_monitor_start)
                 self.window.show()
 
         return 0
@@ -219,7 +234,7 @@ class Application(Gtk.Application):
         del widget, data  # unused arguments
         if self.window:
             self.window.deiconify()
-            self.window.present_with_time(int(time.time()))
+            self.activate()
         return GLib.SOURCE_CONTINUE
 
     def _on_quit(self, widget=None, data=None):
