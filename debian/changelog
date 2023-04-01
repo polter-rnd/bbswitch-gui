@@ -1,3 +1,12 @@
+bbswitch-gui (0.1.9-1) UNRELEASED; urgency=medium
+
+  * Make tray icons compatible with KDE color schemes
+  * Fix typo in appindicator tooltip
+  * Withdaw all notifications on quit
+  * Minor fixes and enhancements
+
+ -- Pavel Artsishevsky <polter.rnd@gmail.com>  Sat, 1 Apr 2023 23:42:32 +0300
+
 bbswitch-gui (0.1.8-1) UNRELEASED; urgency=medium
 
   * Set default icon for tray indicator
