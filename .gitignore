@@ -7,9 +7,6 @@ build/
 dist/
 *.egg-info/
 
-# MyPy cache
-.mypy_cache/
-
 # Python environments
 .env/
 .venv/
