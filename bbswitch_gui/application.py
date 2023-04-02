@@ -250,8 +250,7 @@ class Application(Gtk.Application):
         if error is not None:
             logger.error(str(error))
             self.update_bbswitch()
-            if self.window:
-                self._notify_error('Failed to switch power state', str(error))
+            self._notify_error('Failed to switch power state', str(error))
         if self.window:
             self.window.set_cursor_arrow()
 
@@ -261,11 +260,13 @@ class Application(Gtk.Application):
             self.client.cancel()
             return
 
-        if self.gpu_info and len(self.gpu_info['processes']) > 0:
-            if self.window:
+        if not state and self._enabled_gpu:
+            # Update GPU info
+            self.gpu_info = self.nvidia.gpu_info(self._enabled_gpu)
+            if self.gpu_info and len(self.gpu_info['processes']) > 0:
                 self._notify_error('NVIDIA GPU is in use',
                                    'Please stop processes using it first')
-            return
+                return
 
         # Switch to opposite state
         self.client.set_gpu_state(state, self._on_state_switch_finish)
