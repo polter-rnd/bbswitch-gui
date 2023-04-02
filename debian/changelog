@@ -1,3 +1,9 @@
+bbswitch-gui (0.1.10-1) UNRELEASED; urgency=medium
+
+  * Always request GPU info before trying to turn off
+
+ -- Pavel Artsishevsky <polter.rnd@gmail.com>  Sun, 2 Apr 2023 21:32:15 +0300
+
 bbswitch-gui (0.1.9-1) UNRELEASED; urgency=medium
 
   * Make tray icons compatible with KDE color schemes
