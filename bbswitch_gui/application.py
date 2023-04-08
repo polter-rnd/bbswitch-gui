@@ -247,6 +247,7 @@ class Application(Gtk.Application):
         return GLib.SOURCE_REMOVE
 
     def _on_state_switch_finish(self, error):
+        self.withdraw_notification('error')
         if error is not None:
             logger.error(str(error))
             self.update_bbswitch()
