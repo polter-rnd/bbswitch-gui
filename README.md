@@ -134,6 +134,11 @@ after that GPU monitoring panel will appear:
 
 ![ Main window with GPU enabled ](data/screenshots/gpu_enabled.png)
 
+Also a nice tray icon will appear allowing you to switch the power state even without
+launching the window:
+
+![ Tray icon menu ](data/screenshots/tray_menu.png)
+
 If you have [switchroo-control](https://gitlab.freedesktop.org/hadess/switcheroo-control)
 installed, after GPU has been enabled you should be able to launch any application
 on dedicated graphics card by right-click in GNOME shell:
