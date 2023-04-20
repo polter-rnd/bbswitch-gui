@@ -1,3 +1,9 @@
+bbswitch-gui (0.1.11-1) UNRELEASED; urgency=medium
+
+  * Withdraw error notification on successful state switch
+
+ -- Pavel Artsishevsky <polter.rnd@gmail.com>  Thu, 20 Apr 2023 21:32:15 +0300
+
 bbswitch-gui (0.1.10-1) UNRELEASED; urgency=medium
 
   * Always request GPU info before trying to turn off
