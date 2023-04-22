@@ -88,6 +88,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.kill_button.set_sensitive(False)
         self.toggle_button.set_sensitive(False)
         self.processes_store.clear()
+        self.bar_stack.hide()
 
     def update_header(self, bus_id: str, enabled: bool, vendor: str, device: str) -> None:
         """Update headerbar for selected GPU.
@@ -216,6 +217,7 @@ class MainWindow(Gtk.ApplicationWindow):
     def _set_bar_stack_page(self, name: str):
         page = self.bar_stack.get_child_by_name(name)
         if page:
+            self.bar_stack.show()
             self.bar_stack.set_visible_child(page)
 
     def _get_selected_pids(self):
