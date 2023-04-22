@@ -60,6 +60,7 @@ class Application(Gtk.Application):
         )
 
         self._enabled_gpu: Optional[str] = None
+        self._switch_time: Optional[float] = None
         self._bg_notification_shown = False
 
         self.gpu_info: Optional[NVidiaGpuInfo] = None
@@ -70,13 +71,6 @@ class Application(Gtk.Application):
         """Update GPU state from `bbswitch` module."""
         logging.debug('Got update from bbswitch')
 
-        if self.indicator:
-            self.indicator.reset()
-
-        if self.window:
-            self.window.reset()
-
-        self._enabled_gpu = None
         bus_id, enabled, device, vendor = '', False, '', ''
         try:
             bus_id, enabled = self.bbswitch.get_gpu_state()
@@ -86,13 +80,20 @@ class Application(Gtk.Application):
             message = str(err)
             logger.error(message)
             self.nvidia.monitor_stop()
+            if self.indicator:
+                self.indicator.reset()
             if self.window:
+                self.window.reset()
                 self.window.show_error(message)
-            if not self.window or not self.window.is_active():
+            if not self.window or not self.window.is_visible():
                 self._notify_error('BBswitch monitor error', message)
             return
         except PCIUtilException as err:
             logger.warning(err)
+
+        # If state is the same - skip it
+        if self._switch_time and bool(self._enabled_gpu) == enabled:
+            return
 
         if self.indicator:
             self.indicator.set_state(enabled)
@@ -104,8 +105,9 @@ class Application(Gtk.Application):
             logger.debug('Adapter %s is ON', bus_id)
             self._enabled_gpu = bus_id
             if self.window and self.window.is_visible():
-                self.nvidia.monitor_start(self.update_nvidia, bus_id, time.monotonic())
+                self.nvidia.monitor_start(self.update_nvidia, bus_id, self._switch_time)
         else:
+            self._enabled_gpu = None
             logger.debug('Adapter %s is OFF', bus_id)
             self.nvidia.monitor_stop()
 
@@ -116,28 +118,32 @@ class Application(Gtk.Application):
         """
         logging.debug('Got update from nvidia-smi')
 
+        timeout_expired = time.monotonic() - enabled_ts > MODULE_LOAD_TIMEOUT \
+            if enabled_ts else True
+        message = None
         try:
             self.gpu_info = self.nvidia.gpu_info(bus_id)
             if self.window:
                 if self.gpu_info is None:
                     # None return value means no kernel modules available
-                    if time.monotonic() - enabled_ts > MODULE_LOAD_TIMEOUT:
-                        # If it took really long time, display warning
-                        self.window.show_warning(
-                            'NVIDIA kernel modules are not loaded. '
-                            'Is the driver installed?')
-                    else:
-                        # Otherwise it's normal, loading modules can take some time
-                        self.window.show_info('Loading NVIDIA kernel modules...')
+                    message = 'GPU is turned on, but NVIDIA kernel modules are not loaded'
                 else:
                     self.window.update_monitor(self.gpu_info)
         except NvidiaMonitorException as err:
             message = str(err)
-            logger.error(message)
-            if self.window:
-                self.window.show_error(message)
-            if not self.window or not self.window.is_active():
-                self._notify_error('NVIDIA monitor error', message)
+
+        if message is not None:
+            if timeout_expired:
+                # If it took really long time, display warning
+                logger.warning(message)
+                if self.window:
+                    self.window.show_warning(message)
+                if not self.window or not self.window.is_visible():
+                    self._notify_error('NVIDIA monitor error', message)
+                self.nvidia.monitor_stop()
+            elif self.window:
+                # Otherwise it's normal, loading modules can take some time
+                self.window.show_info('Loading NVIDIA kernel modules...')
 
     def do_startup(self, *args, **kwargs) -> None:
         """Handle application startup."""
@@ -251,6 +257,9 @@ class Application(Gtk.Application):
         if error is not None:
             logger.error(str(error))
             self.update_bbswitch()
+            self.nvidia.monitor_stop()
+            if self.window and self._enabled_gpu:
+                self.update_nvidia(self._enabled_gpu, 0)
             self._notify_error('Failed to switch power state', str(error))
         if self.window:
             self.window.set_cursor_arrow()
@@ -261,6 +270,7 @@ class Application(Gtk.Application):
             self.client.cancel()
             return
 
+        self._switch_time = time.monotonic()
         if not state and self._enabled_gpu:
             # Update GPU info
             self.gpu_info = self.nvidia.gpu_info(self._enabled_gpu)
@@ -268,6 +278,7 @@ class Application(Gtk.Application):
                 self._notify_error('NVIDIA GPU is in use',
                                    'Please stop processes using it first')
                 return
+            self.nvidia.monitor_stop()
 
         # Switch to opposite state
         self.client.set_gpu_state(state, self._on_state_switch_finish)
@@ -291,7 +302,7 @@ class Application(Gtk.Application):
         if self._enabled_gpu:
             self.nvidia.monitor_start(self.update_nvidia,
                                       self._enabled_gpu,
-                                      time.monotonic())
+                                      self._switch_time)
 
     def _on_window_hide(self, window):
         del window  # unused argument
