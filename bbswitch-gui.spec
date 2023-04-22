@@ -1,5 +1,5 @@
 Name:           bbswitch-gui
-Version:        0.1.11
+Version:        0.1.12
 Release:        1%{?dist}
 Summary:        GUI for monitoring and toggling NVIDIA GPU power on Optimus laptops
 
@@ -55,6 +55,10 @@ without need to keep graphics adapter turned on all the time.
 
 
 %changelog
+* Sun Apr 23 2023 Pavel Artsishevsky <polter.rnd@gmail.com> - 0.1.12-1
+- More precise error handling
+- Better optimized UI rendering
+
 * Thu Apr 20 2023 Pavel Artsishevsky <polter.rnd@gmail.com> - 0.1.11-1
 - Withdraw error notification on successful state switch
 

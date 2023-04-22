@@ -1,3 +1,10 @@
+bbswitch-gui (0.1.12-1) UNRELEASED; urgency=medium
+
+  * More precise error handling
+  * Better optimized UI rendering
+
+ -- Pavel Artsishevsky <polter.rnd@gmail.com>  Sun, 23 Apr 2023 02:12:53 +0300
+
 bbswitch-gui (0.1.11-1) UNRELEASED; urgency=medium
 
   * Withdraw error notification on successful state switch
