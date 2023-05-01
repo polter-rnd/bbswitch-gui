@@ -1,3 +1,10 @@
+bbswitch-gui (0.1.13-1) UNRELEASED; urgency=medium
+
+  * Fix sometimes inconsistent tray menu
+  * Minor enhancements
+
+ -- Pavel Artsishevsky <polter.rnd@gmail.com>  Mon, 1 May 2023 15:33:08 +0300
+
 bbswitch-gui (0.1.12-1) UNRELEASED; urgency=medium
 
   * More precise error handling
