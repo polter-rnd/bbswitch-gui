@@ -81,8 +81,6 @@ class MainWindow(Gtk.ApplicationWindow):
         self.check_column.pack_start(check_renderer, False)
         self.check_column.add_attribute(check_renderer, 'active', 3)
 
-        self.reset()
-
     def reset(self) -> None:
         """Reset window to default state."""
         self.state_switch.set_state(False)
