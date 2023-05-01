@@ -273,7 +273,7 @@ class Application(Gtk.Application):
         self._switch_time = time.monotonic()
         if not state and self._enabled_gpu:
             # Update GPU info
-            self.gpu_info = self.nvidia.gpu_info(self._enabled_gpu)
+            self.update_nvidia(self._enabled_gpu, 0)
             if self.gpu_info and len(self.gpu_info['processes']) > 0:
                 self._notify_error('NVIDIA GPU is in use',
                                    'Please stop processes using it first')
