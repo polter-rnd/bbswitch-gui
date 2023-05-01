@@ -27,42 +27,45 @@ class Indicator(GObject.GObject):
             'customtray', 'bbswitch-tray-symbolic',
             AppIndicator3.IndicatorCategory.HARDWARE)
         self._app_indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-        self._app_indicator.set_menu(self._menu())
         self._enabled = False
+        self._sensitive = False
 
     def reset(self) -> None:
         """Reset indicator to default state."""
-        self.set_state(False)
-        self._switch_item.set_sensitive(False)
+        self.set_state(False, False)
 
-    def set_state(self, enabled: bool) -> None:
+    def set_state(self, enabled: bool, sensitive: bool = True) -> None:
         """Set power state of dedicated GPU."""
         self._enabled = enabled
+        self._sensitive = sensitive
         self._app_indicator.set_icon('bbswitch-tray-active-symbolic' if enabled else
                                      'bbswitch-tray-symbolic')
         self._app_indicator.set_title('Discrete GPU: On' if enabled else
                                       'Discrete GPU: Off')
-        self._switch_item.set_label('Turn GPU Off' if enabled else
-                                    'Turn GPU On')
-        self._switch_item.set_image(Gtk.Image.new_from_icon_name(
-            'bbswitch-on-symbolic' if enabled else
-            'bbswitch-off-symbolic',
-            Gtk.IconSize.MENU))  # type: ignore
-        self._switch_item.set_sensitive(True)
+        self._app_indicator.set_menu(self._menu())
 
     def _menu(self):
         menu = Gtk.Menu()
 
-        self._switch_item = Gtk.ImageMenuItem()
-        self._switch_item.set_always_show_image(True)  # type: ignore
-        self._switch_item.connect('activate', self._request_power_state_switch)
-        menu.append(self._switch_item)
+        switch_item = Gtk.ImageMenuItem()
+        switch_item.set_always_show_image(True)  # type: ignore
+        switch_item.connect('activate', self._request_power_state_switch)
+
+        switch_item.set_label('Turn GPU Off' if self._enabled else
+                              'Turn GPU On')
+        switch_item.set_image(Gtk.Image.new_from_icon_name(
+            'bbswitch-on-symbolic' if self._enabled else
+            'bbswitch-off-symbolic',
+            Gtk.IconSize.MENU))  # type: ignore
+        switch_item.set_sensitive(self._sensitive)
+
+        menu.append(switch_item)
 
         menu.append(Gtk.SeparatorMenuItem())
 
-        self.open_item = Gtk.MenuItem('Open Window')
-        self.open_item.connect('activate', self._request_open)
-        menu.append(self.open_item)
+        open_item = Gtk.MenuItem('Open Window')
+        open_item.connect('activate', self._request_open)
+        menu.append(open_item)
 
         close_item = Gtk.MenuItem('Exit')
         close_item.connect('activate', self._request_exit)
