@@ -165,6 +165,36 @@ You won't be able to turn GPU off while some application still uses it.
 To force killing them you can check desired processes and click **Kill selected processes**
 button.
 
+## Known issues and workarounds
+
+After logout from GNOME shell with enabled NVIDIA GPU, on next login it will
+detect it and take in use, thus making it impossible to turn dedicated GPU off.
+
+Workaround is to hide NVIDIA GPU from `gnome-shell` process while keeping it available
+for all other processes. It can be solved by creating a fake directory on startup for
+EGL library configurations which is normally in `/usr/share/glvnd/egl_vendor.d`:
+
+```bash
+$ ls /usr/share/glvnd/egl_vendor.d/
+10_nvidia.json  50_mesa.json
+```
+
+Then override configuration of `org.gnome.Shell@wayland.service` user-owned systemd unit:
+
+```bash
+$ systemctl --user edit org.gnome.Shell@wayland.service
+
+[Service]
+ExecStartPre=/usr/bin/mkdir -p /tmp/egl_vendor.d
+ExecStartPre=/usr/bin/rm -f /tmp/egl_vendor.d/10_nvidia.json
+ExecStartPre=/usr/bin/ln -fs /usr/share/glvnd/egl_vendor.d/50_mesa.json /tmp/egl_vendor.d
+Environment=__EGL_VENDOR_LIBRARY_DIRS=/tmp/egl_vendor.d
+ExecStartPost=/usr/bin/ln -fs /usr/share/glvnd/egl_vendor.d/10_nvidia.json /tmp/egl_vendor.d
+```
+
+On each `gnome-shell` startup it will see only `50_mesa.json` configuration
+and only then `10_nvidia.json` will appear therefore making it availabe for all other processes.
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first
