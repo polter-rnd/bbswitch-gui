@@ -165,6 +165,27 @@ You won't be able to turn GPU off while some application still uses it.
 To force killing them you can check desired processes and click **Kill selected processes**
 button.
 
+## Tips & Tricks
+
+To make `bbswitch-gui` auto-start minimized to tray, one can create a file
+`~/.config/autostart/io.github.polter-rnd.bbswitch-gui.desktop` with the following
+content (`-m` option means run minimized):
+
+```ini
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=BBswitch GUI
+Comment=GUI tool for managing NVIDIA GPU power states and utilization
+Exec=/usr/bin/bbswitch-gui -v -m
+Icon=bbswitch-gui
+Categories=System;Monitor;Utility;X-GNOME-Utilities;
+Keywords=nvidia;bbswitch;optimus;prime;
+X-AppInstall-Keywords=nvidia;bbswitch;optimus;prime;
+X-GNOME-Keywords=nvidia;bbswitch;optimus;prime;
+X-GNOME-UsesNotifications=true
+```
+
 ## Known issues and workarounds
 
 After logout from GNOME shell with enabled NVIDIA GPU, on next login it will
